@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staaten der Erde – Akademisches Analyse- und Simulationsportal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        .nav-active {
+            color: #1e3a8a;
+            border-bottom: 2px solid #1e3a8a;
+            font-weight: 700;
+            background-color: #f8fafc;
+        }
+        /* Custom Academic Table Scrollbar */
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Akademische Kopfzeile -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center text-2xl shadow-inner font-bold">
+                        ∑
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Statistische Demografie & Territoriale Stochastik</h1>
+                            <span class="text-[10px] bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded tracking-wide uppercase">Dataset 2024/2026</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium mt-0.5">Vollständige Auswertung aller erfassten Staaten und Territorien der Erde</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden lg:block text-right">
+                        <span class="text-slate-400 block font-mono text-[10px] uppercase">Erfasste Einheiten</span>
+                        <span class="font-bold text-slate-800 text-sm font-mono-num" id="headerCount">205 Entitäten</span>
+                    </div>
+                    <div class="hidden lg:block text-right border-l pl-6 border-slate-200">
+                        <span class="text-slate-400 block font-mono text-[10px] uppercase">Erfasste Weltbevölkerung</span>
+                        <span class="font-bold text-blue-700 text-sm font-mono-num" id="headerPop">-</span>
+                    </div>
+                    <div class="hidden lg:block text-right border-l pl-6 border-slate-200">
+                        <span class="text-slate-400 block font-mono text-[10px] uppercase">Erfasste Landfläche</span>
+                        <span class="font-bold text-emerald-700 text-sm font-mono-num" id="headerArea">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hauptnavigation -->
+            <nav class="flex space-x-2 overflow-x-auto text-xs font-medium border-t border-slate-100" id="mainNav">
+                <button onclick="navTab('dashboard')" class="nav-btn nav-active py-3 px-4 whitespace-nowrap transition-colors">📊 Deskriptive Gesamtstatistik</button>
+                <button onclick="navTab('generator')" class="nav-btn text-slate-500 hover:text-slate-900 py-3 px-4 whitespace-nowrap transition-colors">🎲 Stochastischer Generator & Großsimulation</button>
+                <button onclick="navTab('percentile')" class="nav-btn text-slate-500 hover:text-slate-900 py-3 px-4 whitespace-nowrap transition-colors">📈 Vollständige Perzentil- & Lorenz-Analyse</button>
+                <button onclick="navTab('whatif')" class="nav-btn text-slate-500 hover:text-slate-900 py-3 px-4 whitespace-nowrap transition-colors">💡 3D-Hypothesenrechner (Was wäre wenn)</button>
+                <button onclick="navTab('fulltable')" class="nav-btn text-slate-500 hover:text-slate-900 py-3 px-4 whitespace-nowrap transition-colors">📋 Gesamtdatenbank (Ausgangsstellung & Filter)</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hauptbereich -->
+    <main class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DESKRIPTIVE GESAMTSTATISTIK         -->
+        <!-- ========================================== -->
+        <section id="tab-dashboard" class="space-y-8">
+            <!-- Globale Summen & Kennwerte -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Erfasste Weltbevölkerung</p>
+                    <div class="text-2xl font-black text-slate-900 mt-2 font-mono-num" id="kpiTotalPop">-</div>
+                    <div class="text-xs text-blue-600 mt-2 font-medium flex items-center justify-between">
+                        <span>Referenzwert Erde: 8,08 Mrd.</span>
+                        <span class="font-bold">100,00 %</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Erfasste Landfläche</p>
+                    <div class="text-2xl font-black text-slate-900 mt-2 font-mono-num" id="kpiTotalArea">-</div>
+                    <div class="text-xs text-emerald-600 mt-2 font-medium flex items-center justify-between">
+                        <span>Summe aller Staatsgebiete</span>
+                        <span class="font-bold font-mono-num" id="kpiAreaSqKm">-</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Globale Reale Dichte</p>
+                    <div class="text-2xl font-black text-slate-900 mt-2 font-mono-num" id="kpiGlobalDensity">-</div>
+                    <p class="text-xs text-slate-500 mt-2">Quotient aus Gesamteinwohnern und Gesamtfläche</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gini-Koeffizienten (Ungleichheit)</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Bevölkerung:</span>
+                            <span class="text-lg font-black text-amber-700 font-mono-num" id="kpiGiniPop">-</span>
+                        </div>
+                        <div class="border-l pl-4 border-slate-200">
+                            <span class="text-xs text-slate-400 block">Fläche:</span>
+                            <span class="text-lg font-black text-purple-700 font-mono-num" id="kpiGiniArea">-</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">0 = Gleichverteilung, 1 = Maximale Konzentration</p>
+                </div>
+            </div>
+
+            <!-- Akademische Verteilungskennzahlen -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Bevölkerung Parameter -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Demografische Parameter</h2>
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono font-bold">Pop (N=205)</span>
+                    </div>
+                    <dl class="divide-y divide-slate-100 text-xs mt-3">
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Arithmetisches Mittel (μ):</dt><dd class="font-bold text-slate-800 font-mono-num" id="pMean">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Median (50% Perzentil):</dt><dd class="font-bold text-blue-700 font-mono-num" id="pMedian">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Standardabweichung (σ):</dt><dd class="font-bold text-slate-800 font-mono-num" id="pStd">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Variationskoeffizient (CV):</dt><dd class="font-bold text-slate-800 font-mono-num" id="pCv">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Unteres Quartil (Q1 - 25%):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="pQ1">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Oberes Quartil (Q3 - 75%):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="pQ3">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Interquartilabstand (IQR):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="pIqr">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Spannweite (Min - Max):</dt><dd class="font-bold text-slate-800 font-mono-num" id="pRange">-</dd></div>
+                    </dl>
+                </div>
+
+                <!-- Flächen Parameter -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Territoriale Parameter</h2>
+                        <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-mono font-bold">Fläche (km²)</span>
+                    </div>
+                    <dl class="divide-y divide-slate-100 text-xs mt-3">
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Arithmetisches Mittel (μ):</dt><dd class="font-bold text-slate-800 font-mono-num" id="aMean">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Median (50% Perzentil):</dt><dd class="font-bold text-emerald-700 font-mono-num" id="aMedian">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Standardabweichung (σ):</dt><dd class="font-bold text-slate-800 font-mono-num" id="aStd">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Variationskoeffizient (CV):</dt><dd class="font-bold text-slate-800 font-mono-num" id="aCv">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Unteres Quartil (Q1 - 25%):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="aQ1">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Oberes Quartil (Q3 - 75%):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="aQ3">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Interquartilabstand (IQR):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="aIqr">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Spannweite (Min - Max):</dt><dd class="font-bold text-slate-800 font-mono-num" id="aRange">-</dd></div>
+                    </dl>
+                </div>
+
+                <!-- Bevölkerungsdichte Parameter -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Dichte-Verteilung</h2>
+                        <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-mono font-bold">Einw. / km²</span>
+                    </div>
+                    <dl class="divide-y divide-slate-100 text-xs mt-3">
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Ungewichtetes Mittel (Ø Dichte):</dt><dd class="font-bold text-slate-800 font-mono-num" id="dMean">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Median-Dichte:</dt><dd class="font-bold text-purple-700 font-mono-num" id="dMedian">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Unteres Quartil (Q1):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="dQ1">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Oberes Quartil (Q3):</dt><dd class="font-semibold text-slate-700 font-mono-num" id="dQ3">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Minimum (Extrem dünn):</dt><dd class="font-bold text-slate-800 font-mono-num" id="dMin">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Maximum (Extrem dicht):</dt><dd class="font-bold text-slate-800 font-mono-num" id="dMax">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Dichte &gt; 1.000 Einw./km²:</dt><dd class="font-bold text-slate-800 font-mono-num" id="dAbove1000">-</dd></div>
+                        <div class="py-2 flex justify-between"><dt class="text-slate-500">Dichte &lt; 25 Einw./km²:</dt><dd class="font-bold text-slate-800 font-mono-num" id="dBelow25">-</dd></div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Dynamische SVG-Lorenzkurve & Verteilung -->
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Akademische Lorenz-Kurve & Konzentrationsmessung</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Kumulativer Anteil der Entitäten (%) gegenüber dem kumulativen Anteil an der globalen Gesamtheit (%)</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-medium">
+                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-1 bg-slate-300 inline-block"></span> <span>Diagonale (Gleichverteilung)</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-1 bg-blue-600 inline-block"></span> <span>Bevölkerung (Gini: <span id="lorenzGiniPopVal" class="font-mono-num font-bold"></span>)</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-1 bg-emerald-600 inline-block"></span> <span>Fläche (Gini: <span id="lorenzGiniAreaVal" class="font-mono-num font-bold"></span>)</span></div>
+                    </div>
+                </div>
+
+                <!-- SVG Container -->
+                <div class="mt-6 flex justify-center">
+                    <svg id="lorenzSvg" viewBox="0 0 700 450" class="w-full max-w-4xl h-auto overflow-visible select-none"></svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: STOCHASTISCHER ZUFALLSGENERATOR    -->
+        <!-- ========================================== -->
+        <section id="tab-generator" class="hidden space-y-8">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Exakter Wahrscheinlichkeits- & Simulationsgenerator</h2>
+                    <p class="text-xs text-slate-500 mt-1 max-w-3xl leading-relaxed">
+                        Es existiert <b>keine Gleichverteilung</b>. Alle Ziehungswahrscheinlichkeiten $p_i$ werden streng maßstabsgetreu aus den reellen Parametern berechnet ($p_i = \text{Wert}_i / \sum \text{Wert}$). 
+                        Der Schnellgenerator simuliert selbst Milliarden Ziehungen ohne Performance-Einbußen über eine stochastisch verifizierte multinomiale Normalapproximation.
+                    </p>
+                </div>
+
+                <!-- Generator Steuerung -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+                    <!-- Modus -->
+                    <div class="lg:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">1. Ziehungsparameter wählen</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer border-2 border-blue-600 bg-white p-3.5 rounded-xl flex flex-col justify-between" id="lblModePop">
+                                <input type="radio" name="simWeightMode" value="pop" checked onchange="setSimMode('pop')" class="sr-only">
+                                <span class="text-xs font-bold text-blue-900 flex items-center justify-between">
+                                    <span>👥 Bevölkerung</span>
+                                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                                </span>
+                                <span class="text-[11px] text-slate-500 mt-2 block">Wahrscheinlichkeit proportional zur Einwohnerzahl</span>
+                            </label>
+                            <label class="cursor-pointer border-2 border-slate-200 bg-white p-3.5 rounded-xl flex flex-col justify-between" id="lblModeArea">
+                                <input type="radio" name="simWeightMode" value="area" onchange="setSimMode('area')" class="sr-only">
+                                <span class="text-xs font-bold text-slate-800 flex items-center justify-between">
+                                    <span>🗺️ Staatsfläche</span>
+                                    <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                                </span>
+                                <span class="text-[11px] text-slate-500 mt-2 block">Wahrscheinlichkeit proportional zum Staatsgebiet</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Einzelziehung vs Großsimulation -->
+                    <div class="lg:col-span-7 bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">2. Ausführung & Anzahl der Ziehungen ($N$)</label>
+                            <p class="text-[11px] text-slate-500 mb-3">Wählen Sie Einzelschritt oder geben Sie eine beliebige Zahl ein (z. B. 10.000, 1.000.000 oder 1.000.000.000).</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button onclick="drawSingle()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-xs transition flex items-center gap-1.5">
+                                <span>🎯</span> Einfachziehung (1x)
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="simCountInput" value="1000000" min="1" max="100000000000" class="bg-white border border-slate-300 text-slate-800 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold w-44 outline-none focus:ring-2 focus:ring-blue-500">
+                                <button onclick="runSimulation()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-3 rounded-xl transition flex items-center gap-1.5">
+                                    <span>⚡</span> Schnellgenerator ausführen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Einzelziehungs-Ergebnisbox -->
+                <div id="singleDrawBox" class="hidden bg-slate-900 text-white p-6 rounded-2xl shadow-md border border-slate-800 transition-all">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+                        <div>
+                            <span class="text-[10px] uppercase font-mono tracking-widest text-blue-400 font-bold" id="singleDrawModeTag">Zufallsauswahl nach Bevölkerung</span>
+                            <h3 class="text-2xl font-black tracking-tight mt-0.5" id="sCountryName">-</h3>
+                            <p class="text-xs text-slate-400" id="sOfficialName">-</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block font-mono">Exakte mathematische Wahrscheinlichkeit</span>
+                            <span class="text-2xl font-extrabold text-blue-400 font-mono-num" id="sProbVal">- %</span>
+                            <span class="text-[11px] text-slate-400 block font-mono" id="sProbRatio">1 zu -</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 pt-4 text-xs font-mono">
+                        <div><span class="text-slate-500 block text-[10px]">Hauptstadt:</span><span class="font-bold text-slate-200" id="sCapital">-</span></div>
+                        <div><span class="text-slate-500 block text-[10px]">Einwohner 2024:</span><span class="font-bold text-slate-200 font-mono-num" id="sPop">-</span></div>
+                        <div><span class="text-slate-500 block text-[10px]">Fläche (km²):</span><span class="font-bold text-slate-200 font-mono-num" id="sArea">-</span></div>
+                        <div><span class="text-slate-500 block text-[10px]">Dichte:</span><span class="font-bold text-slate-200 font-mono-num" id="sDensity">-</span></div>
+                        <div><span class="text-slate-500 block text-[10px]">ISO / TLD:</span><span class="font-bold text-slate-200" id="sIso">-</span></div>
+                    </div>
+                </div>
+
+                <!-- Simulationsinfo & Filterleiste für Tabelle -->
+                <div class="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-slate-100">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                            <span>Vollständige Simulationsmatrix aller Entitäten</span>
+                            <span class="text-xs bg-slate-100 font-mono font-bold text-slate-600 px-2 py-0.5 rounded" id="simStatusBadge">Basis: 0 Ziehungen</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Zeigt absolute Ziehungen, Hochrechnungen und Standardabweichungen vom theoretischen Erwartungswert.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="resetSimSortToOriginal()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-1.5 rounded-lg transition">
+                            ↺ Ausgangsstellung (Original)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulationstabelle -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortSimTable('origIndex')">Nr. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortSimTable('name')">Staat oder Gebiet ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortSimTable('capital')">Hauptstadt ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortSimTable('pop')">Einwohner 2024 ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-blue-700" onclick="sortSimTable('popPer1B')">Einw. pro 1 Mrd. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortSimTable('area')">Fläche (km²) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-emerald-700" onclick="sortSimTable('areaPer100M')">Fläche pro 100 Mio. km² ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortSimTable('density')">Dichte ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right bg-blue-50/60 text-blue-900" onclick="sortSimTable('genCount')">Generiert (absolut) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right bg-purple-50/60 text-purple-900" onclick="sortSimTable('scaled1B')">Hochgerechnet (1 Mrd./100M) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortSimTable('delta')">Abweichung (Δ & %) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortSimTable('zScore')">Z-Score (σ) ⇕</th>
+                                <th class="p-3">ISO-3</th>
+                                <th class="p-3">ISO-2</th>
+                                <th class="p-3">TLD</th>
+                                <th class="p-3">Englischer Name</th>
+                                <th class="p-3">Eigenname</th>
+                            </tr>
+                        </thead>
+                        <tbody id="simTableBody" class="divide-y divide-slate-100 font-mono-num text-[11px]"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: PERZENTIL- & LORENZ-ANALYSE         -->
+        <!-- ========================================== -->
+        <section id="tab-percentile" class="hidden space-y-8">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Vollständige Perzentil- & Ranglistenanalyse</h2>
+                    <p class="text-xs text-slate-500 mt-1 max-w-3xl leading-relaxed">
+                        Exakte mathematische Rang- und Perzentil-Klassifizierung für jedes Land bezogen auf <b>Einwohnerzahl</b> oder <b>Staatsfläche</b>. 
+                        Inklusive prozentualer Anteile mit hoher Präzision und kumuliertem Summenanteil (Lorenz-Wert).
+                    </p>
+                </div>
+
+                <!-- Perzentil Umschalter & Rechner -->
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                    <div class="md:col-span-5">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Metrik für Perzentil-Reihe</label>
+                        <div class="inline-flex rounded-xl bg-slate-200 p-1 text-xs font-bold w-full">
+                            <button onclick="setPercentileMetric('pop')" id="btnPercPop" class="flex-1 py-2 rounded-lg bg-white text-blue-900 shadow-xs transition">👥 Bevölkerung</button>
+                            <button onclick="setPercentileMetric('area')" id="btnPercArea" class="flex-1 py-2 rounded-lg text-slate-600 transition">🗺️ Fläche</button>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Interaktiver Perzentil-Rechner</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="percQueryInput" placeholder="Wert eingeben..." class="bg-white border border-slate-300 text-slate-800 px-3.5 py-2 rounded-xl text-xs font-mono font-bold flex-1 outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="calcCustomPercentile()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                                Berechnen
+                            </button>
+                        </div>
+                        <div id="percQueryResult" class="text-xs font-medium text-blue-800 mt-2 font-mono-num"></div>
+                    </div>
+                </div>
+
+                <!-- Perzentiltabelle für alle Entitäten -->
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs font-bold text-slate-700" id="percTableCountDisplay">Alle 205 Entitäten geordnet</span>
+                    <button onclick="resetPercSortToOriginal()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-1.5 rounded-lg transition">
+                        ↺ Ausgangsstellung (Original)
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortPercTable('origIndex')">Orig.-Nr. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-center" onclick="sortPercTable('rank')">Rang ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortPercTable('name')">Staat oder Gebiet ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortPercTable('val')">Absoluter Wert ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortPercTable('pct')">Relativer Anteil (%) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-blue-800 font-bold" onclick="sortPercTable('percentile')">Empirischer Perzentil-Rang ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-emerald-800 font-bold" onclick="sortPercTable('cumPct')">Kumulierter Anteil (Lorenz-Wert) ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortPercTable('popPer1B')">Einw. pro 1 Mrd. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortPercTable('areaPer100M')">Fläche pro 100 Mio. km² ⇕</th>
+                                <th class="p-3">Hauptstadt</th>
+                                <th class="p-3">ISO-3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="percTableBody" class="divide-y divide-slate-100 font-mono-num text-[11px]"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: 3D-HYPOTHESENRECHNER (WAS WÄRE WENN) -->
+        <!-- ========================================== -->
+        <section id="tab-whatif" class="hidden space-y-8">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Erweiterter 3D-Hypothesenrechner (Was wäre wenn)</h2>
+                    <p class="text-xs text-slate-500 mt-1 max-w-3xl leading-relaxed">
+                        Berechnen Sie theoretische Kontrafaktizitäten zwischen zwei beliebigen Staaten bezüglich <b>Bevölkerungsdichte</b>, <b>Staatsfläche</b> und <b>Einwohnerzahl</b>, 
+                        sowie globale Hochrechnungen auf die gesamte Erde.
+                    </p>
+                </div>
+
+                <!-- Länderauswahl -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Ausgangsland (Subjekt A)</label>
+                        <select id="whatifSelectA" onchange="calcWhatIf()" class="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Referenzland (Maßstab B)</label>
+                        <select id="whatifSelectB" onchange="calcWhatIf()" class="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500"></select>
+                    </div>
+                </div>
+
+                <!-- Gegenüberstellung der Realdaten -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50/50 border border-blue-200 p-5 rounded-2xl text-xs">
+                        <span class="text-[10px] uppercase font-bold text-blue-500 block mb-1">Realdaten Subjekt A</span>
+                        <h3 class="text-lg font-black text-blue-950" id="wiNameA">-</h3>
+                        <p class="text-slate-500 mt-0.5 text-[11px]" id="wiOfficialA">-</p>
+                        <dl class="divide-y divide-blue-200/60 mt-4 font-mono-num">
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Einwohner:</dt><dd class="font-bold text-slate-900" id="wiPopA">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Fläche:</dt><dd class="font-bold text-slate-900" id="wiAreaA">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Bevölkerungsdichte:</dt><dd class="font-bold text-slate-900" id="wiDensityA">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Anteil Weltbevölkerung:</dt><dd class="font-bold text-blue-700" id="wiPopPctA">-</dd></div>
+                        </dl>
+                    </div>
+
+                    <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-2xl text-xs">
+                        <span class="text-[10px] uppercase font-bold text-emerald-600 block mb-1">Realdaten Referenz B</span>
+                        <h3 class="text-lg font-black text-emerald-950" id="wiNameB">-</h3>
+                        <p class="text-slate-500 mt-0.5 text-[11px]" id="wiOfficialB">-</p>
+                        <dl class="divide-y divide-emerald-200/60 mt-4 font-mono-num">
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Einwohner:</dt><dd class="font-bold text-slate-900" id="wiPopB">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Fläche:</dt><dd class="font-bold text-slate-900" id="wiAreaB">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Bevölkerungsdichte:</dt><dd class="font-bold text-slate-900" id="wiDensityB">-</dd></div>
+                            <div class="py-1.5 flex justify-between"><dt class="text-slate-600">Anteil Weltbevölkerung:</dt><dd class="font-bold text-emerald-700" id="wiPopPctB">-</dd></div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- 3 Hypothesen-Module -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Hypothese 1: Dichte -->
+                    <div class="bg-white border-2 border-slate-200 p-5 rounded-2xl shadow-xs">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Dichte-Hypothese</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Was wäre, wenn <b>Land A</b> die Bevölkerungsdichte von <b>Land B</b> hätte (bei unveränderter Fläche von A)?
+                        </p>
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] text-slate-400 block font-mono">Theoretische Einwohnerzahl:</span>
+                            <div class="text-xl font-black text-blue-900 font-mono-num mt-1" id="resHypoDensity">-</div>
+                            <span class="text-xs font-semibold text-slate-600 block mt-1" id="resHypoDensityFactor">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Hypothese 2: Fläche -->
+                    <div class="bg-white border-2 border-slate-200 p-5 rounded-2xl shadow-xs">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Flächen-Hypothese</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Was wäre, wenn <b>Land A</b> die Fläche von <b>Land B</b> hätte (bei unveränderter Dichte von A)?
+                        </p>
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] text-slate-400 block font-mono">Theoretische Einwohnerzahl:</span>
+                            <div class="text-xl font-black text-emerald-900 font-mono-num mt-1" id="resHypoArea">-</div>
+                            <span class="text-xs font-semibold text-slate-600 block mt-1" id="resHypoAreaFactor">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Hypothese 3: Bevölkerung -->
+                    <div class="bg-white border-2 border-slate-200 p-5 rounded-2xl shadow-xs">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">3. Einwohner-Hypothese</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Was wäre, wenn <b>Land A</b> so viele Einwohner wie <b>Land B</b> hätte (bei unveränderter Fläche von A)?
+                        </p>
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] text-slate-400 block font-mono">Daraus resultierende Dichte:</span>
+                            <div class="text-xl font-black text-purple-900 font-mono-num mt-1" id="resHypoPopDensity">-</div>
+                            <span class="text-xs font-semibold text-slate-600 block mt-1" id="resHypoPopDensityFactor">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Globale Dichte-Hochrechnung -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800">
+                    <h4 class="text-xs font-extrabold uppercase tracking-widest text-blue-400">🌐 Globale planetare Hochrechnung</h4>
+                    <p class="text-xs text-slate-300 mt-1 leading-relaxed" id="globalPlanetText">
+                        Wie viele Menschen würden auf der Erde leben, wenn die gesamte erfasste Landfläche dieselbe Bevölkerungsdichte hätte wie Subjekt A?
+                    </p>
+                    <div class="text-3xl font-black text-white font-mono-num mt-3" id="globalPlanetPop">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: GESAMTDATENBANK (ORIGINALLISTE)     -->
+        <!-- ========================================== -->
+        <section id="tab-fulltable" class="hidden space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Vollständige Gesamtdatenbank</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Alle 205 Entitäten aus der Referenztabelle mit zusätzlichen Normierungsspalten</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="resetFullTableToOriginal()" class="text-xs bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl transition shadow-xs">
+                            ↺ In Ausgangsstellung zurücksetzen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Suche & Filter -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+                    <div class="sm:col-span-6 relative">
+                        <input type="text" id="fullSearchInput" oninput="renderFullTable()" placeholder="Suchfilter: Staat, Hauptstadt, ISO, Sprache..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="sm:col-span-6 flex items-center gap-2 overflow-x-auto text-xs">
+                        <button onclick="setFullFilter('all')" class="full-f-btn bg-slate-800 text-white px-3 py-2 rounded-lg font-bold" data-f="all">Alle</button>
+                        <button onclick="setFullFilter('un')" class="full-f-btn bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium" data-f="un">Offiziell</button>
+                        <button onclick="setFullFilter('disputed')" class="full-f-btn bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium" data-f="disputed">Umstritten</button>
+                        <button onclick="setFullFilter('p10m')" class="full-f-btn bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium" data-f="p10m">&gt; 10 Mio.</button>
+                        <button onclick="setFullFilter('p1m')" class="full-f-btn bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium" data-f="p1m">&lt; 1 Mio.</button>
+                    </div>
+                </div>
+
+                <!-- Tabelle -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortFullTable('origIndex')">Ausgangs-Nr. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortFullTable('name')">Staat oder Gebiet ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortFullTable('official')">Langform des Staatsnamens ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortFullTable('capital')">Hauptstadt ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortFullTable('pop')">Einwohner 2024 ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-blue-800" onclick="sortFullTable('popPer1B')">Einwohner pro 1 Mrd. ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortFullTable('area')">Fläche in km² ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right text-emerald-800" onclick="sortFullTable('areaPer100M')">Fläche pro 100 Mio. qkm ⇕</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100 text-right" onclick="sortFullTable('density')">Einw. pro km² ⇕</th>
+                                <th class="p-3 text-center">ISO-3</th>
+                                <th class="p-3 text-center">ISO-2</th>
+                                <th class="p-3 text-center">TLD</th>
+                                <th class="p-3 cursor-pointer hover:bg-slate-100" onclick="sortFullTable('en')">Englischer Name ⇕</th>
+                                <th class="p-3">Eigenname</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullTableBody" class="divide-y divide-slate-100 font-mono-num text-[11px]"></tbody>
+                    </table>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-500 pt-2 font-mono">
+                    <span id="fullTableCountDisplay">-</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Akademische Fußzeile -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
+        <div class="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <b>Quellenbasis:</b> DSW Datenreport 2024 (Stand: Mitte 2024) | CIA World Factbook (Stand: Oktober 2025).
+            </div>
+            <div class="font-mono text-[11px] text-slate-400">
+                Deterministische & Stochastische Rechenengine | Dynamische Normierung aktiv
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================= -->
+    <!-- DYNAMISCHES DATEN- & BERECHNUNGS-SCRIPT                            -->
+    <!-- ================================================================= -->
+    <script>
+        /**
+         * MASTER-DATENBANK DER STAATEN DER ERDE
+         * In exakter Original-Reihenfolge der vorgelegten Tabelle.
+         * Jede Änderung/Ergänzung in diesem Datensatz aktualisiert automatisch ALLE Berechnungen.
+         */
+        const RAW_DATA = [
+            { name: "Abchasien", official: "Republik Abchasien", capital: "Sochumi", pop: 240000, area: 8600, density: 27.9, iso3: "—", iso2: "—", tld: "—", en: "Abkhazia", local: "Аԥсны Aṗsny / Абхазия", disputed: true },
+            { name: "Afghanistan", official: "Islamische Republik Afghanistan / Emirat", capital: "Kabul", pop: 42600000, area: 652230, density: 65.3, iso3: "AFG", iso2: "AF", tld: ".af", en: "Afghanistan", local: "افغانستان Afghānestān", disputed: false },
+            { name: "Ägypten", official: "Arabische Republik Ägypten", capital: "Kairo", pop: 106300000, area: 1001450, density: 106.0, iso3: "EGY", iso2: "EG", tld: ".eg", en: "Egypt", local: "مصر Misr", disputed: false },
+            { name: "Albanien", official: "Republik Albanien", capital: "Tirana", pop: 2800000, area: 28748, density: 97.4, iso3: "ALB", iso2: "AL", tld: ".al", en: "Albania", local: "Shqipëria", disputed: false },
+            { name: "Algerien", official: "Demokratische Volksrepublik Algerien", capital: "Algier", pop: 47000000, area: 2381741, density: 19.7, iso3: "DZA", iso2: "DZ", tld: ".dz", en: "Algeria", local: "الجزائر al-Dschazā'ir", disputed: false },
+            { name: "Andorra", official: "Fürstentum Andorra", capital: "Andorra la Vella", pop: 90000, area: 468, density: 192.0, iso3: "AND", iso2: "AD", tld: ".ad", en: "Andorra", local: "Andorra", disputed: false },
+            { name: "Angola", official: "Republik Angola", capital: "Luanda", pop: 37900000, area: 1246700, density: 30.4, iso3: "AGO", iso2: "AO", tld: ".ao", en: "Angola", local: "Angola", disputed: false },
+            { name: "Antigua und Barbuda", official: "Antigua und Barbuda", capital: "Saint John’s", pop: 100000, area: 443, density: 226.0, iso3: "ATG", iso2: "AG", tld: ".ag", en: "Antigua and Barbuda", local: "Antigua and Barbuda", disputed: false },
+            { name: "Äquatorialguinea", official: "Republik Äquatorialguinea", capital: "Ciudad de la Paz", pop: 1900000, area: 28051, density: 67.7, iso3: "GNQ", iso2: "GQ", tld: ".gq", en: "Equatorial Guinea", local: "Guinea Ecuatorial", disputed: false },
+            { name: "Argentinien", official: "Argentinische Republik", capital: "Buenos Aires", pop: 47100000, area: 2780400, density: 16.9, iso3: "ARG", iso2: "AR", tld: ".ar", en: "Argentina", local: "Argentina", disputed: false },
+            { name: "Armenien", official: "Republik Armenien", capital: "Jerewan", pop: 3000000, area: 29743, density: 101.0, iso3: "ARM", iso2: "AM", tld: ".am", en: "Armenia", local: "Հայաստան Hajastan", disputed: false },
+            { name: "Aserbaidschan", official: "Republik Aserbaidschan", capital: "Baku", pop: 10200000, area: 86600, density: 118.0, iso3: "AZE", iso2: "AZ", tld: ".az", en: "Azerbaijan", local: "Azǝrbaycan", disputed: false },
+            { name: "Äthiopien", official: "Demokratische Bundesrepublik Äthiopien", capital: "Addis Abeba", pop: 129700000, area: 1104300, density: 117.0, iso3: "ETH", iso2: "ET", tld: ".et", en: "Ethiopia", local: "ኢትዮጵያ Ityop̣p̣əya", disputed: false },
+            { name: "Australien", official: "Commonwealth of Australia", capital: "Canberra", pop: 27300000, area: 7741220, density: 3.53, iso3: "AUS", iso2: "AU", tld: ".au", en: "Australia", local: "Australia", disputed: false },
+            { name: "Bahamas", official: "Commonwealth der Bahamas", capital: "Nassau", pop: 400000, area: 13880, density: 28.8, iso3: "BHS", iso2: "BS", tld: ".bs", en: "Bahamas", local: "Bahamas", disputed: false },
+            { name: "Bahrain", official: "Königreich Bahrain", capital: "Manama", pop: 1600000, area: 760, density: 2110.0, iso3: "BHR", iso2: "BH", tld: ".bh", en: "Bahrain", local: "البحرين al-Bahrayn", disputed: false },
+            { name: "Bangladesch", official: "Volksrepublik Bangladesch", capital: "Dhaka", pop: 173600000, area: 143998, density: 1210.0, iso3: "BGD", iso2: "BD", tld: ".bd", en: "Bangladesh", local: "বাংলাদেশ Bāṃlādeś", disputed: false },
+            { name: "Barbados", official: "Barbados", capital: "Bridgetown", pop: 300000, area: 430, density: 698.0, iso3: "BRB", iso2: "BB", tld: ".bb", en: "Barbados", local: "Barbados", disputed: false },
+            { name: "Belarus", official: "Republik Belarus", capital: "Minsk", pop: 9100000, area: 207600, density: 43.8, iso3: "BLR", iso2: "BY", tld: ".by", en: "Belarus", local: "Беларусь Belarus", disputed: false },
+            { name: "Belgien", official: "Königreich Belgien", capital: "Brüssel", pop: 11800000, area: 30528, density: 387.0, iso3: "BEL", iso2: "BE", tld: ".be", en: "Belgium", local: "België / Belgique / Belgien", disputed: false },
+            { name: "Belize", official: "Belize", capital: "Belmopan", pop: 400000, area: 22966, density: 17.4, iso3: "BLZ", iso2: "BZ", tld: ".bz", en: "Belize", local: "Belize", disputed: false },
+            { name: "Benin", official: "Republik Benin", capital: "Porto-Novo (de jure) / Cotonou", pop: 13800000, area: 112622, density: 123.0, iso3: "BEN", iso2: "BJ", tld: ".bj", en: "Benin", local: "Bénin", disputed: false },
+            { name: "Bhutan", official: "Königreich Bhutan", capital: "Thimphu", pop: 800000, area: 38394, density: 20.8, iso3: "BTN", iso2: "BT", tld: ".bt", en: "Bhutan", local: "འབྲུག་ཡུལ་ Druk Yul", disputed: false },
+            { name: "Bolivien", official: "Plurinationaler Staat Bolivien", capital: "Sucre (de jure) / La Paz", pop: 12300000, area: 1098581, density: 11.2, iso3: "BOL", iso2: "BO", tld: ".bo", en: "Bolivia", local: "Bolivia", disputed: false },
+            { name: "Bosnien und Herzegowina", official: "Bosnien und Herzegowina", capital: "Sarajevo", pop: 3400000, area: 51197, density: 66.4, iso3: "BIH", iso2: "BA", tld: ".ba", en: "Bosnia and Herzegovina", local: "Bosna i Hercegovina", disputed: false },
+            { name: "Botswana", official: "Republik Botsuana", capital: "Gaborone", pop: 2400000, area: 581730, density: 4.13, iso3: "BWA", iso2: "BW", tld: ".bw", en: "Botswana", local: "Botswana", disputed: false },
+            { name: "Brasilien", official: "Föderative Republik Brasilien", capital: "Brasília", pop: 212000000, area: 8514877, density: 24.9, iso3: "BRA", iso2: "BR", tld: ".br", en: "Brazil", local: "Brasil", disputed: false },
+            { name: "Brunei", official: "Brunei Darussalam", capital: "Bandar Seri Begawan", pop: 500000, area: 5765, density: 86.7, iso3: "BRN", iso2: "BN", tld: ".bn", en: "Brunei Darussalam", local: "Negara Brunei Darussalam", disputed: false },
+            { name: "Bulgarien", official: "Republik Bulgarien", capital: "Sofia", pop: 6400000, area: 110879, density: 57.7, iso3: "BGR", iso2: "BG", tld: ".bg", en: "Bulgaria", local: "България Bălgarija", disputed: false },
+            { name: "Burkina Faso", official: "Burkina Faso", capital: "Ouagadougou", pop: 23400000, area: 274200, density: 85.3, iso3: "BFA", iso2: "BF", tld: ".bf", en: "Burkina Faso", local: "Burkina Faso", disputed: false },
+            { name: "Burundi", official: "Republik Burundi", capital: "Gitega", pop: 1400000, area: 27830, density: 503.0, iso3: "BDI", iso2: "BI", tld: ".bi", en: "Burundi", local: "Burundi", disputed: false },
+            { name: "Chile", official: "Republik Chile", capital: "Santiago de Chile", pop: 20100000, area: 756102, density: 26.6, iso3: "CHL", iso2: "CL", tld: ".cl", en: "Chile", local: "Chile", disputed: false },
+            { name: "China, Republik / Taiwan", official: "Taiwan (Republik China)", capital: "Taipeh", pop: 23500000, area: 35980, density: 653.0, iso3: "TWN", iso2: "TW", tld: ".tw", en: "Taiwan oder Republic of China", local: "中華民國 Zhonghua Minguo", disputed: true },
+            { name: "China, Volksrepublik", official: "Volksrepublik China", capital: "Peking", pop: 1408600000, area: 9596961, density: 147.0, iso3: "CHN", iso2: "CN", tld: ".cn", en: "China", local: "中华人民共和国 Zhonghua Renmin Gongheguo", disputed: false },
+            { name: "Cookinseln", official: "Cookinseln", capital: "Avarua", pop: 11500, area: 236, density: 48.7, iso3: "COK", iso2: "CK", tld: ".ck", en: "Cook Islands", local: "Cook Islands", disputed: true },
+            { name: "Costa Rica", official: "Republik Costa Rica", capital: "San José", pop: 5300000, area: 51100, density: 104.0, iso3: "CRI", iso2: "CR", tld: ".cr", en: "Costa Rica", local: "Costa Rica", disputed: false },
+            { name: "Dänemark", official: "Königreich Dänemark", capital: "Kopenhagen", pop: 6000000, area: 43094, density: 139.0, iso3: "DNK", iso2: "DK", tld: ".dk", en: "Denmark", local: "Danmark", disputed: false },
+            { name: "Deutschland", official: "Bundesrepublik Deutschland", capital: "Berlin", pop: 84900000, area: 357022, density: 238.0, iso3: "DEU", iso2: "DE", tld: ".de", en: "Germany", local: "Deutschland", disputed: false },
+            { name: "Dominica", official: "Commonwealth Dominica", capital: "Roseau", pop: 70000, area: 751, density: 93.2, iso3: "DMA", iso2: "DM", tld: ".dm", en: "Dominica", local: "Dominica", disputed: false },
+            { name: "Dominikanische Republik", official: "Dominikanische Republik", capital: "Santo Domingo", pop: 10800000, area: 48670, density: 222.0, iso3: "DOM", iso2: "DO", tld: ".do", en: "Dominican Republic", local: "República Dominicana", disputed: false },
+            { name: "Dschibuti", official: "Republik Dschibuti", capital: "Dschibuti", pop: 1000000, area: 23200, density: 43.1, iso3: "DJI", iso2: "DJ", tld: ".dj", en: "Djibouti", local: "Djibouti", disputed: false },
+            { name: "Ecuador", official: "Republik Ecuador", capital: "Quito", pop: 18300000, area: 283561, density: 64.5, iso3: "ECU", iso2: "EC", tld: ".ec", en: "Ecuador", local: "Ecuador", disputed: false },
+            { name: "El Salvador", official: "Republik El Salvador", capital: "San Salvador", pop: 6300000, area: 21041, density: 299.0, iso3: "SLV", iso2: "SV", tld: ".sv", en: "El Salvador", local: "El Salvador", disputed: false },
+            { name: "Elfenbeinküste", official: "Republik Côte d’Ivoire", capital: "Yamoussoukro (de jure) / Abidjan", pop: 31500000, area: 322463, density: 97.7, iso3: "CIV", iso2: "CI", tld: ".ci", en: "Ivory Coast", local: "Côte d’Ivoire", disputed: false },
+            { name: "Eritrea", official: "Staat Eritrea", capital: "Asmara", pop: 3500000, area: 117600, density: 29.8, iso3: "ERI", iso2: "ER", tld: ".er", en: "Eritrea", local: "ኤርትራ Ertra", disputed: false },
+            { name: "Estland", official: "Republik Estland", capital: "Tallinn", pop: 1400000, area: 45228, density: 31.0, iso3: "EST", iso2: "EE", tld: ".ee", en: "Estonia", local: "Eesti", disputed: false },
+            { name: "Eswatini", official: "Königreich Eswatini", capital: "Mbabane (de jure) / Lobamba", pop: 1200000, area: 17364, density: 69.1, iso3: "SWZ", iso2: "SZ", tld: ".sz", en: "Eswatini", local: "Eswatini / eSwatini", disputed: false },
+            { name: "Fidschi", official: "Republik Fidschi", capital: "Suva", pop: 900000, area: 18274, density: 49.3, iso3: "FJI", iso2: "FJ", tld: ".fj", en: "Fiji", local: "Fiji", disputed: false },
+            { name: "Finnland", official: "Republik Finnland", capital: "Helsinki", pop: 5600000, area: 338145, density: 16.6, iso3: "FIN", iso2: "FI", tld: ".fi", en: "Finland", local: "Suomi / Finland", disputed: false },
+            { name: "Frankreich", official: "Französische Republik", capital: "Paris", pop: 66300000, area: 551500, density: 120.0, iso3: "FRA", iso2: "FR", tld: ".fr", en: "France", local: "France", disputed: false },
+            { name: "Gabun", official: "Gabunische Republik", capital: "Libreville", pop: 2500000, area: 267667, density: 9.34, iso3: "GAB", iso2: "GA", tld: ".ga", en: "Gabon", local: "Gabon", disputed: false },
+            { name: "Gambia", official: "Republik Gambia", capital: "Banjul", pop: 2800000, area: 11295, density: 248.0, iso3: "GMB", iso2: "GM", tld: ".gm", en: "Gambia, the", local: "The Gambia", disputed: false },
+            { name: "Georgien", official: "Georgien", capital: "Tiflis", pop: 3700000, area: 69700, density: 53.1, iso3: "GEO", iso2: "GE", tld: ".ge", en: "Georgia", local: "საქართველო Sakartwelo", disputed: false },
+            { name: "Ghana", official: "Republik Ghana", capital: "Accra", pop: 32700000, area: 238533, density: 137.0, iso3: "GHA", iso2: "GH", tld: ".gh", en: "Ghana", local: "Ghana", disputed: false },
+            { name: "Grenada", official: "Grenada", capital: "St. George’s", pop: 100000, area: 344, density: 291.0, iso3: "GRD", iso2: "GD", tld: ".gd", en: "Grenada", local: "Grenada", disputed: false },
+            { name: "Griechenland", official: "Hellenische Republik", capital: "Athen", pop: 9900000, area: 131957, density: 75.0, iso3: "GRC", iso2: "GR", tld: ".gr", en: "Greece", local: "Ελλάδα Elláda / Ελλάς", disputed: false },
+            { name: "Guatemala", official: "Republik Guatemala", capital: "Guatemala-Stadt", pop: 17800000, area: 108889, density: 163.0, iso3: "GTM", iso2: "GT", tld: ".gt", en: "Guatemala", local: "Guatemala", disputed: false },
+            { name: "Guinea", official: "Republik Guinea", capital: "Conakry", pop: 14000000, area: 245857, density: 56.9, iso3: "GIN", iso2: "GN", tld: ".gn", en: "Guinea", local: "Guinée", disputed: false },
+            { name: "Guinea-Bissau", official: "Republik Guinea-Bissau", capital: "Bissau", pop: 2200000, area: 36125, density: 60.9, iso3: "GNB", iso2: "GW", tld: ".gw", en: "Guinea-Bissau", local: "Guiné-Bissau", disputed: false },
+            { name: "Guyana", official: "Kooperative Republik Guyana", capital: "Georgetown", pop: 800000, area: 214969, density: 3.72, iso3: "GUY", iso2: "GY", tld: ".gy", en: "Guyana", local: "Guyana", disputed: false },
+            { name: "Haiti", official: "Republik Haiti", capital: "Port-au-Prince", pop: 11800000, area: 27750, density: 425.0, iso3: "HTI", iso2: "HT", tld: ".ht", en: "Haiti", local: "Haïti / Ayiti", disputed: false },
+            { name: "Honduras", official: "Republik Honduras", capital: "Tegucigalpa", pop: 9900000, area: 112090, density: 88.3, iso3: "HND", iso2: "HN", tld: ".hn", en: "Honduras", local: "Honduras", disputed: false },
+            { name: "Indien", official: "Republik Indien", capital: "Neu-Delhi", pop: 1441700000, area: 3287263, density: 439.0, iso3: "IND", iso2: "IN", tld: ".in", en: "India", local: "India / भारत Bharat", disputed: false },
+            { name: "Indonesien", official: "Republik Indonesien", capital: "Nusantara", pop: 281600000, area: 1904569, density: 148.0, iso3: "IDN", iso2: "ID", tld: ".id", en: "Indonesia", local: "Indonesia", disputed: false },
+            { name: "Irak", official: "Republik Irak", capital: "Bagdad", pop: 44400000, area: 438317, density: 101.0, iso3: "IRQ", iso2: "IQ", tld: ".iq", en: "Iraq", local: "العراق al-ʿIrāq", disputed: false },
+            { name: "Iran", official: "Islamische Republik Iran", capital: "Teheran", pop: 91600000, area: 1648195, density: 55.6, iso3: "IRN", iso2: "IR", tld: ".ir", en: "Iran", local: "ایران Īrān", disputed: false },
+            { name: "Irland", official: "Irland", capital: "Dublin", pop: 5500000, area: 70273, density: 78.3, iso3: "IRL", iso2: "IE", tld: ".ie", en: "Ireland", local: "Éire / Ireland", disputed: false },
+            { name: "Island", official: "Republik Island", capital: "Reykjavík", pop: 400000, area: 103000, density: 3.88, iso3: "ISL", iso2: "IS", tld: ".is", en: "Iceland", local: "Ísland", disputed: false },
+            { name: "Israel", official: "Staat Israel", capital: "Jerusalem", pop: 9900000, area: 22380, density: 442.0, iso3: "ISR", iso2: "IL", tld: ".il", en: "Israel", local: "ישראל Yisra’el", disputed: false },
+            { name: "Italien", official: "Italienische Republik", capital: "Rom", pop: 59000000, area: 301340, density: 196.0, iso3: "ITA", iso2: "IT", tld: ".it", en: "Italy", local: "Italia", disputed: false },
+            { name: "Jamaika", official: "Jamaika", capital: "Kingston", pop: 2700000, area: 10991, density: 246.0, iso3: "JAM", iso2: "JM", tld: ".jm", en: "Jamaica", local: "Jamaica", disputed: false },
+            { name: "Japan", official: "Japan", capital: "Tokio", pop: 123800000, area: 377915, density: 328.0, iso3: "JPN", iso2: "JP", tld: ".jp", en: "Japan", local: "日本 Nihon/Nippon", disputed: false },
+            { name: "Jemen", official: "Republik Jemen", capital: "Sanaa (de jure) / Aden", pop: 40600000, area: 527968, density: 76.9, iso3: "YEM", iso2: "YE", tld: ".ye", en: "Yemen", local: "اليمن al-Yaman", disputed: false },
+            { name: "Jordanien", official: "Haschemitisches Königreich Jordanien", capital: "Amman", pop: 11800000, area: 89342, density: 132.0, iso3: "JOR", iso2: "JO", tld: ".jo", en: "Jordan", local: "الأردن al-Urdunn", disputed: false },
+            { name: "Kambodscha", official: "Königreich Kambodscha", capital: "Phnom Penh", pop: 16600000, area: 181035, density: 91.7, iso3: "KHM", iso2: "KH", tld: ".kh", en: "Cambodia", local: "កម្ពុជា Kampuchea", disputed: false },
+            { name: "Kamerun", official: "Republik Kamerun", capital: "Yaoundé", pop: 28800000, area: 475440, density: 60.6, iso3: "CMR", iso2: "CM", tld: ".cm", en: "Cameroon", local: "Cameroun / Cameroon", disputed: false },
+            { name: "Kanada", official: "Kanada", capital: "Ottawa", pop: 41400000, area: 9984670, density: 4.15, iso3: "CAN", iso2: "CA", tld: ".ca", en: "Canada", local: "Canada", disputed: false },
+            { name: "Kap Verde", official: "Republik Cabo Verde", capital: "Praia", pop: 500000, area: 4033, density: 124.0, iso3: "CPV", iso2: "CV", tld: ".cv", en: "Cape Verde", local: "Cabo Verde", disputed: false },
+            { name: "Kasachstan", official: "Republik Kasachstan", capital: "Astana", pop: 20200000, area: 2724900, density: 7.41, iso3: "KAZ", iso2: "KZ", tld: ".kz", en: "Kazakhstan", local: "Qazaqstan / Казахстан", disputed: false },
+            { name: "Katar", official: "Staat Katar", capital: "Doha", pop: 3200000, area: 11586, density: 276.0, iso3: "QAT", iso2: "QA", tld: ".qa", en: "Qatar", local: "دولة قطر Dawlat Qatar", disputed: false },
+            { name: "Kenia", official: "Republik Kenia", capital: "Nairobi", pop: 52600000, area: 580367, density: 90.6, iso3: "KEN", iso2: "KE", tld: ".ke", en: "Kenya", local: "Kenya", disputed: false },
+            { name: "Kirgisistan", official: "Kirgisische Republik", capital: "Bischkek", pop: 7200000, area: 199951, density: 36.0, iso3: "KGZ", iso2: "KG", tld: ".kg", en: "Kyrgyzstan", local: "Кыргызстан Kyrgysstan", disputed: false },
+            { name: "Kiribati", official: "Republik Kiribati", capital: "South Tarawa", pop: 100000, area: 811, density: 123.0, iso3: "KIR", iso2: "KI", tld: ".ki", en: "Kiribati", local: "Kiribati", disputed: false },
+            { name: "Kolumbien", official: "Republik Kolumbien", capital: "Bogotá", pop: 52900000, area: 1138910, density: 46.4, iso3: "COL", iso2: "CO", tld: ".co", en: "Colombia", local: "Colombia", disputed: false },
+            { name: "Komoren", official: "Union der Komoren", capital: "Moroni", pop: 900000, area: 2235, density: 403.0, iso3: "COM", iso2: "KM", tld: ".km", en: "Comoros", local: "Komori", disputed: false },
+            { name: "Kongo, Demokratische Republik", official: "Demokratische Republik Kongo", capital: "Kinshasa", pop: 109300000, area: 2344858, density: 46.6, iso3: "COD", iso2: "CD", tld: ".cd", en: "Congo, Democratic Republic of the", local: "Congo, République démocratique du", disputed: false },
+            { name: "Kongo, Republik", official: "Republik Kongo", capital: "Brazzaville", pop: 6100000, area: 342000, density: 17.8, iso3: "COG", iso2: "CG", tld: ".cg", en: "Congo, Republic of", local: "Congo, République du", disputed: false },
+            { name: "Korea, Nord (Nordkorea)", official: "Demokratische Volksrepublik Korea", capital: "Pjöngjang", pop: 26300000, area: 120538, density: 218.0, iso3: "PRK", iso2: "KP", tld: ".kp", en: "Korea, Democratic People's Republic of", local: "조선/朝鮮 Chosŏn", disputed: false },
+            { name: "Korea, Süd (Südkorea)", official: "Republik Korea", capital: "Seoul", pop: 51800000, area: 99720, density: 519.0, iso3: "KOR", iso2: "KR", tld: ".kr", en: "Korea, Republic of", local: "한국/韓國 Hanguk", disputed: false },
+            { name: "Kosovo", official: "Republik Kosovo", capital: "Pristina", pop: 1700000, area: 10887, density: 156.0, iso3: "XXK", iso2: "XK", tld: ".xk", en: "Kosovo", local: "Kosova/Kosovë / Косово", disputed: true },
+            { name: "Kroatien", official: "Republik Kroatien", capital: "Zagreb", pop: 3900000, area: 56594, density: 68.9, iso3: "HRV", iso2: "HR", tld: ".hr", en: "Croatia", local: "Hrvatska", disputed: false },
+            { name: "Kuba", official: "Republik Kuba", capital: "Havanna", pop: 11000000, area: 110860, density: 99.2, iso3: "CUB", iso2: "CU", tld: ".cu", en: "Cuba", local: "Cuba", disputed: false },
+            { name: "Kuwait", official: "Staat Kuwait", capital: "Kuwait", pop: 5100000, area: 17818, density: 286.0, iso3: "KWT", iso2: "KW", tld: ".kw", en: "Kuwait", local: "دولة الكويت Dawlat al-Kuwayt", disputed: false },
+            { name: "Laos", official: "Demokratische Volksrepublik Laos", capital: "Vientiane", pop: 7700000, area: 236800, density: 32.5, iso3: "LAO", iso2: "LA", tld: ".la", en: "Lao, People’s Democratic Republic", local: "ລາວ Lao", disputed: false },
+            { name: "Lesotho", official: "Königreich Lesotho", capital: "Maseru", pop: 2300000, area: 30355, density: 75.8, iso3: "LSO", iso2: "LS", tld: ".ls", en: "Lesotho", local: "Lesotho", disputed: false },
+            { name: "Lettland", official: "Republik Lettland", capital: "Riga", pop: 1900000, area: 64589, density: 29.4, iso3: "LVA", iso2: "LV", tld: ".lv", en: "Latvia", local: "Latvija", disputed: false },
+            { name: "Libanon", official: "Libanesische Republik", capital: "Beirut", pop: 5200000, area: 10400, density: 500.0, iso3: "LBN", iso2: "LB", tld: ".lb", en: "Lebanon", local: "لبنان Lubnān", disputed: false },
+            { name: "Liberia", official: "Republik Liberia", capital: "Monrovia", pop: 5400000, area: 111369, density: 48.5, iso3: "LBR", iso2: "LR", tld: ".lr", en: "Liberia", local: "Liberia", disputed: false },
+            { name: "Libyen", official: "Staat Libyen", capital: "Tripolis", pop: 7400000, area: 1759540, density: 4.21, iso3: "LBY", iso2: "LY", tld: ".ly", en: "Libya", local: "ليبيا Lībiyā", disputed: false },
+            { name: "Liechtenstein", official: "Fürstentum Liechtenstein", capital: "Vaduz", pop: 40000, area: 160, density: 250.0, iso3: "LIE", iso2: "LI", tld: ".li", en: "Liechtenstein", local: "Liechtenstein", disputed: false },
+            { name: "Litauen", official: "Republik Litauen", capital: "Vilnius", pop: 2900000, area: 65300, density: 44.4, iso3: "LTU", iso2: "LT", tld: ".lt", en: "Lithuania", local: "Lietuva", disputed: false },
+            { name: "Luxemburg", official: "Großherzogtum Luxemburg", capital: "Luxemburg", pop: 700000, area: 2586, density: 271.0, iso3: "LUX", iso2: "LU", tld: ".lu", en: "Luxembourg", local: "Luxemburg / Luxembourg / Lëtzebuerg", disputed: false },
+            { name: "Madagaskar", official: "Republik Madagaskar", capital: "Antananarivo", pop: 30800000, area: 587041, density: 52.5, iso3: "MDG", iso2: "MG", tld: ".mg", en: "Madagascar", local: "Madagascar", disputed: false },
+            { name: "Malawi", official: "Republik Malawi", capital: "Lilongwe", pop: 20300000, area: 118484, density: 171.0, iso3: "MWI", iso2: "MW", tld: ".mw", en: "Malawi", local: "Malaŵi", disputed: false },
+            { name: "Malaysia", official: "Malaysia", capital: "Kuala Lumpur (de jure) / Putrajaya", pop: 34200000, area: 329847, density: 104.0, iso3: "MYS", iso2: "MY", tld: ".my", en: "Malaysia", local: "Malaysia", disputed: false },
+            { name: "Malediven", official: "Republik Malediven", capital: "Malé", pop: 600000, area: 298, density: 2010.0, iso3: "MDV", iso2: "MV", tld: ".mv", en: "Maldives", local: "ދިވެހިރާއްޖެ Dhivehi Raajje", disputed: false },
+            { name: "Mali", official: "Republik Mali", capital: "Bamako", pop: 22900000, area: 1240192, density: 18.5, iso3: "MLI", iso2: "ML", tld: ".ml", en: "Mali", local: "Mali", disputed: false },
+            { name: "Malta", official: "Republik Malta", capital: "Valletta", pop: 600000, area: 316, density: 1900.0, iso3: "MLT", iso2: "MT", tld: ".mt", en: "Malta", local: "Malta", disputed: false },
+            { name: "Marokko", official: "Königreich Marokko", capital: "Rabat", pop: 37400000, area: 446550, density: 83.8, iso3: "MAR", iso2: "MA", tld: ".ma", en: "Morocco", local: "المغرب al-Maghrib", disputed: false },
+            { name: "Marshallinseln", official: "Republik Marshallinseln", capital: "Majuro", pop: 50000, area: 181, density: 276.0, iso3: "MHL", iso2: "MH", tld: ".mh", en: "Marshall Islands", local: "Marshall Islands", disputed: false },
+            { name: "Mauretanien", official: "Islamische Republik Mauretanien", capital: "Nouakchott", pop: 4600000, area: 1030700, density: 4.46, iso3: "MRT", iso2: "MR", tld: ".mr", en: "Mauritania", local: "موريتانيا Mūrītāniyā", disputed: false },
+            { name: "Mauritius", official: "Republik Mauritius", capital: "Port Louis", pop: 1300000, area: 2103, density: 618.0, iso3: "MUS", iso2: "MU", tld: ".mu", en: "Mauritius", local: "Mauritius", disputed: false },
+            { name: "Mexiko", official: "Vereinigte Mexikanische Staaten", capital: "Mexiko-Stadt", pop: 129400000, area: 1964375, density: 65.9, iso3: "MEX", iso2: "MX", tld: ".mx", en: "Mexico", local: "México", disputed: false },
+            { name: "Mikronesien", official: "Föderierte Staaten von Mikronesien", capital: "Palikir", pop: 100000, area: 702, density: 142.0, iso3: "FSM", iso2: "FM", tld: ".fm", en: "Micronesia, Federal States of", local: "Micronesia", disputed: false },
+            { name: "Moldau", official: "Republik Moldau", capital: "Chișinău", pop: 3500000, area: 33851, density: 103.0, iso3: "MDA", iso2: "MD", tld: ".md", en: "Moldova", local: "Moldova", disputed: false },
+            { name: "Monaco", official: "Fürstentum Monaco", capital: "Stadtstaat", pop: 40000, area: 2.03, density: 19700.0, iso3: "MCO", iso2: "MC", tld: ".mc", en: "Monaco", local: "Monaco", disputed: false },
+            { name: "Mongolei", official: "Mongolei", capital: "Ulaanbaatar", pop: 3400000, area: 1564116, density: 2.17, iso3: "MNG", iso2: "MN", tld: ".mn", en: "Mongolia", local: "Монгол Улс Mongol Uls", disputed: false },
+            { name: "Montenegro", official: "Montenegro", capital: "Podgorica", pop: 600000, area: 13812, density: 43.4, iso3: "MNE", iso2: "ME", tld: ".me", en: "Montenegro", local: "Црна Гора Crna Gora", disputed: false },
+            { name: "Mosambik", official: "Republik Mosambik", capital: "Maputo", pop: 33200000, area: 799380, density: 41.5, iso3: "MOZ", iso2: "MZ", tld: ".mz", en: "Mozambique", local: "Moçambique", disputed: false },
+            { name: "Myanmar", official: "Republik der Union Myanmar", capital: "Naypyidaw", pop: 57500000, area: 676578, density: 85.0, iso3: "MMR", iso2: "MM", tld: ".mm", en: "Myanmar oder Burma", local: "မြန်မာ Mranma", disputed: false },
+            { name: "Namibia", official: "Republik Namibia", capital: "Windhoek", pop: 2800000, area: 824292, density: 3.4, iso3: "NAM", iso2: "NA", tld: ".na", en: "Namibia", local: "Namibia", disputed: false },
+            { name: "Nauru", official: "Republik Naoero", capital: "Yaren", pop: 10000, area: 21, density: 476.0, iso3: "NRU", iso2: "NR", tld: ".nr", en: "Naoero", local: "Naoero", disputed: false },
+            { name: "Nepal", official: "Demokratische Bundesrepublik Nepal", capital: "Kathmandu", pop: 30000000, area: 147181, density: 204.0, iso3: "NPL", iso2: "NP", tld: ".np", en: "Nepal", local: "नेपाल Nepāl", disputed: false },
+            { name: "Neuseeland", official: "Neuseeland", capital: "Wellington", pop: 5400000, area: 267710, density: 20.2, iso3: "NZL", iso2: "NZ", tld: ".nz", en: "New Zealand", local: "New Zealand / Aotearoa", disputed: false },
+            { name: "Nicaragua", official: "Republik Nicaragua", capital: "Managua", pop: 6900000, area: 130730, density: 52.8, iso3: "NIC", iso2: "NI", tld: ".ni", en: "Nicaragua", local: "Nicaragua", disputed: false },
+            { name: "Niederlande", official: "Königreich der Niederlande", capital: "Amsterdam (de jure) / Den Haag", pop: 18000000, area: 41543, density: 433.0, iso3: "NLD", iso2: "NL", tld: ".nl", en: "Netherlands", local: "Nederland", disputed: false },
+            { name: "Niger", official: "Republik Niger", capital: "Niamey", pop: 26300000, area: 1267000, density: 20.8, iso3: "NER", iso2: "NE", tld: ".ne", en: "Niger", local: "Niger", disputed: false },
+            { name: "Nigeria", official: "Bundesrepublik Nigeria", capital: "Abuja", pop: 227800000, area: 923768, density: 247.0, iso3: "NGA", iso2: "NG", tld: ".ng", en: "Nigeria", local: "Nigeria", disputed: false },
+            { name: "Niue", official: "Niue", capital: "Alofi", pop: 1229, area: 260, density: 4.73, iso3: "NIU", iso2: "NU", tld: ".nu", en: "Niue", local: "Niue", disputed: true },
+            { name: "Nordmazedonien", official: "Republik Nordmazedonien", capital: "Skopje", pop: 1800000, area: 25713, density: 70.0, iso3: "MKD", iso2: "MK", tld: ".mk", en: "North Macedonia", local: "Северна Македонија", disputed: false },
+            { name: "Nordzypern", official: "Türkische Republik Nordzypern", capital: "Nord-Nikosia", pop: 295000, area: 3355, density: 87.9, iso3: "—", iso2: "—", tld: ".gov.nc.tr", en: "Northern Cyprus", local: "Kuzey Kıbrıs Türk Cumhuriyeti", disputed: true },
+            { name: "Norwegen", official: "Königreich Norwegen", capital: "Oslo", pop: 5600000, area: 323802, density: 17.3, iso3: "NOR", iso2: "NO", tld: ".no", en: "Norway", local: "Norge / Noreg", disputed: false },
+            { name: "Oman", official: "Sultanat Oman", capital: "Maskat", pop: 5200000, area: 309500, density: 16.8, iso3: "OMN", iso2: "OM", tld: ".om", en: "Oman", local: "عمان ʿUmān", disputed: false },
+            { name: "Österreich", official: "Republik Österreich", capital: "Wien", pop: 9200000, area: 83871, density: 110.0, iso3: "AUT", iso2: "AT", tld: ".at", en: "Austria", local: "Österreich", disputed: false },
+            { name: "Osttimor / Timor-Leste", official: "Demokratische Republik Timor-Leste", capital: "Dili", pop: 1400000, area: 14874, density: 94.1, iso3: "TLS", iso2: "TL", tld: ".tl", en: "East Timor oder Timor-Leste", local: "Timor-Leste", disputed: false },
+            { name: "Pakistan", official: "Islamische Republik Pakistan", capital: "Islamabad", pop: 243500000, area: 796095, density: 306.0, iso3: "PAK", iso2: "PK", tld: ".pk", en: "Pakistan", local: "پاکستان Pākistān", disputed: false },
+            { name: "Palästina", official: "Staat Palästina", capital: "Ostjerusalem (de jure) / Ramallah", pop: 5400000, area: 6220, density: 868.0, iso3: "PSE", iso2: "PS", tld: ".ps", en: "Palestine", local: "دولة فلسطين Dawlat Filastīn", disputed: true },
+            { name: "Palau", official: "Republik Palau", capital: "Ngerulmud", pop: 20000, area: 459, density: 43.6, iso3: "PLW", iso2: "PW", tld: ".pw", en: "Palau", local: "Belau", disputed: false },
+            { name: "Panama", official: "Republik Panama", capital: "Panama-Stadt", pop: 4500000, area: 75420, density: 59.7, iso3: "PAN", iso2: "PA", tld: ".pa", en: "Panama", local: "Panamá", disputed: false },
+            { name: "Papua-Neuguinea", official: "Unabhängiger Staat Papua-Neuguinea", capital: "Port Moresby", pop: 9700000, area: 462840, density: 21.0, iso3: "PNG", iso2: "PG", tld: ".pg", en: "Papua New Guinea", local: "Papua Niu Gini", disputed: false },
+            { name: "Paraguay", official: "Republik Paraguay", capital: "Asunción", pop: 6900000, area: 406752, density: 17.0, iso3: "PRY", iso2: "PY", tld: ".py", en: "Paraguay", local: "Paraguay / Paraguái", disputed: false },
+            { name: "Peru", official: "Republik Peru", capital: "Lima", pop: 34000000, area: 1285216, density: 26.5, iso3: "PER", iso2: "PE", tld: ".pe", en: "Peru", local: "Perú", disputed: false },
+            { name: "Philippinen", official: "Republik der Philippinen", capital: "Manila", pop: 114400000, area: 299000, density: 383.0, iso3: "PHL", iso2: "PH", tld: ".ph", en: "Philippines", local: "Pilipinas", disputed: false },
+            { name: "Polen", official: "Republik Polen", capital: "Warschau", pop: 37600000, area: 312685, density: 120.0, iso3: "POL", iso2: "PL", tld: ".pl", en: "Poland", local: "Polska", disputed: false },
+            { name: "Portugal", official: "Portugiesische Republik", capital: "Lissabon", pop: 10700000, area: 92090, density: 116.0, iso3: "PRT", iso2: "PT", tld: ".pt", en: "Portugal", local: "Portugal", disputed: false },
+            { name: "Ruanda", official: "Republik Ruanda", capital: "Kigali", pop: 13800000, area: 26338, density: 524.0, iso3: "RWA", iso2: "RW", tld: ".rw", en: "Rwanda", local: "Rwanda", disputed: false },
+            { name: "Rumänien", official: "Rumänien", capital: "Bukarest", pop: 19100000, area: 238391, density: 80.1, iso3: "ROU", iso2: "RO", tld: ".ro", en: "Romania", local: "România", disputed: false },
+            { name: "Russland", official: "Russische Föderation", capital: "Moskau", pop: 146000000, area: 17098242, density: 8.54, iso3: "RUS", iso2: "RU", tld: ".ru", en: "Russia", local: "Россия Rossija", disputed: false },
+            { name: "Salomonen", official: "Salomonen", capital: "Honiara", pop: 800000, area: 28896, density: 27.7, iso3: "SLB", iso2: "SB", tld: ".sb", en: "Solomon Islands", local: "Solomon Islands", disputed: false },
+            { name: "Sambia", official: "Republik Sambia", capital: "Lusaka", pop: 21300000, area: 752618, density: 28.3, iso3: "ZMB", iso2: "ZM", tld: ".zm", en: "Zambia", local: "Zambia", disputed: false },
+            { name: "Samoa", official: "Unabhängiger Staat Samoa", capital: "Apia", pop: 200000, area: 2831, density: 70.6, iso3: "WSM", iso2: "WS", tld: ".ws", en: "Samoa", local: "Sāmoa", disputed: false },
+            { name: "San Marino", official: "Republik San Marino", capital: "San Marino", pop: 40000, area: 61, density: 656.0, iso3: "SMR", iso2: "SM", tld: ".sm", en: "San Marino", local: "San Marino", disputed: false },
+            { name: "São Tomé und Príncipe", official: "Demokratische Republik São Tomé und Príncipe", capital: "São Tomé", pop: 200000, area: 964, density: 207.0, iso3: "STP", iso2: "ST", tld: ".st", en: "São Tomé and Príncipe", local: "São Tomé e Príncipe", disputed: false },
+            { name: "Saudi-Arabien", official: "Königreich Saudi-Arabien", capital: "Riad", pop: 35100000, area: 2149690, density: 16.3, iso3: "SAU", iso2: "SA", tld: ".sa", en: "Saudi Arabia", local: "العربية السعودية", disputed: false },
+            { name: "Schweden", official: "Königreich Schweden", capital: "Stockholm", pop: 10600000, area: 450295, density: 23.5, iso3: "SWE", iso2: "SE", tld: ".se", en: "Sweden", local: "Sverige", disputed: false },
+            { name: "Schweiz", official: "Schweizerische Eidgenossenschaft", capital: "Bern (de facto)", pop: 9000000, area: 41277, density: 218.0, iso3: "CHE", iso2: "CH", tld: ".ch", en: "Switzerland", local: "Schweiz / Suisse / Svizzera", disputed: false },
+            { name: "Senegal", official: "Republik Senegal", capital: "Dakar", pop: 18500000, area: 196722, density: 94.0, iso3: "SEN", iso2: "SN", tld: ".sn", en: "Senegal", local: "Sénégal", disputed: false },
+            { name: "Serbien", official: "Republik Serbien", capital: "Belgrad", pop: 6600000, area: 77474, density: 85.2, iso3: "SRB", iso2: "RS", tld: ".rs", en: "Serbia", local: "Србија Srbija", disputed: false },
+            { name: "Seychellen", official: "Republik Seychellen", capital: "Victoria", pop: 100000, area: 455, density: 220.0, iso3: "SYC", iso2: "SC", tld: ".sc", en: "Seychelles", local: "Seychelles / Sesel", disputed: false },
+            { name: "Sierra Leone", official: "Republik Sierra Leone", capital: "Freetown", pop: 8600000, area: 71740, density: 120.0, iso3: "SLE", iso2: "SL", tld: ".sl", en: "Sierra Leone", local: "Sierra Leone", disputed: false },
+            { name: "Simbabwe", official: "Republik Simbabwe", capital: "Harare", pop: 16600000, area: 390757, density: 42.5, iso3: "ZWE", iso2: "ZW", tld: ".zw", en: "Zimbabwe", local: "Zimbabwe", disputed: false },
+            { name: "Singapur", official: "Republik Singapur", capital: "Stadtstaat", pop: 6200000, area: 697, density: 7890.0, iso3: "SGP", iso2: "SG", tld: ".sg", en: "Singapore", local: "Singapora", disputed: false },
+            { name: "Slowakei", official: "Slowakische Republik", capital: "Bratislava", pop: 5400000, area: 49035, density: 110.0, iso3: "SVK", iso2: "SK", tld: ".sk", en: "Slovakia", local: "Slovensko", disputed: false },
+            { name: "Slowenien", official: "Republik Slowenien", capital: "Ljubljana", pop: 2100000, area: 20273, density: 104.0, iso3: "SVN", iso2: "SI", tld: ".si", en: "Slovenia", local: "Slovenija", disputed: false },
+            { name: "Somalia", official: "Bundesrepublik Somalia", capital: "Mogadischu", pop: 19000000, area: 637657, density: 29.8, iso3: "SOM", iso2: "SO", tld: ".so", en: "Somalia", local: "Soomaaliya / الصومال", disputed: false },
+            { name: "Somaliland", official: "Republik Somaliland", capital: "Hargeysa", pop: 3500000, area: 137600, density: 25.4, iso3: "—", iso2: "—", tld: "—", en: "Somaliland", local: "Soomaaliland", disputed: true },
+            { name: "Spanien", official: "Königreich Spanien", capital: "Madrid", pop: 48800000, area: 505370, density: 96.6, iso3: "ESP", iso2: "ES", tld: ".es", en: "Spain", local: "España", disputed: false },
+            { name: "Sri Lanka", official: "Demokratische Sozialistische Republik Sri Lanka", capital: "Sri Jayewardenepura Kotte / Colombo", pop: 21900000, area: 65610, density: 334.0, iso3: "LKA", iso2: "LK", tld: ".lk", en: "Sri Lanka", local: "ශ්‍රී ලංකා Śrī Laṃkā", disputed: false },
+            { name: "St. Kitts und Nevis", official: "Föderation St. Kitts und Nevis", capital: "Basseterre", pop: 50000, area: 261, density: 192.0, iso3: "KNA", iso2: "KN", tld: ".kn", en: "Saint Kitts and Nevis", local: "Saint Kitts and Nevis", disputed: false },
+            { name: "St. Lucia", official: "St. Lucia", capital: "Castries", pop: 200000, area: 616, density: 325.0, iso3: "LCA", iso2: "LC", tld: ".lc", en: "Saint Lucia", local: "Saint Lucia", disputed: false },
+            { name: "St. Vincent und die Grenadinen", official: "St. Vincent und die Grenadinen", capital: "Kingstown", pop: 100000, area: 389, density: 257.0, iso3: "VCT", iso2: "VC", tld: ".vc", en: "Saint Vincent and the Grenadines", local: "Saint Vincent and the Grenadines", disputed: false },
+            { name: "Südafrika", official: "Republik Südafrika", capital: "Pretoria / Kapstadt / Bloemfontein", pop: 63000000, area: 1219090, density: 51.7, iso3: "ZAF", iso2: "ZA", tld: ".za", en: "South Africa", local: "South Africa", disputed: false },
+            { name: "Sudan", official: "Republik Sudan", capital: "Khartum", pop: 50400000, area: 1861484, density: 27.1, iso3: "SDN", iso2: "SD", tld: ".sd", en: "Sudan", local: "السودان as-Sūdān", disputed: false },
+            { name: "Südossetien", official: "Republik Südossetien", capital: "Zchinwali", pop: 51000, area: 3885, density: 13.1, iso3: "—", iso2: "—", tld: "—", en: "South Ossetia", local: "Хуссар Ирыстон", disputed: true },
+            { name: "Südsudan", official: "Republik Südsudan", capital: "Juba", pop: 11900000, area: 644329, density: 18.5, iso3: "SSD", iso2: "SS", tld: ".ss", en: "South Sudan", local: "South Sudan", disputed: false },
+            { name: "Suriname", official: "Republik Suriname", capital: "Paramaribo", pop: 700000, area: 163820, density: 4.27, iso3: "SUR", iso2: "SR", tld: ".sr", en: "Suriname", local: "Suriname", disputed: false },
+            { name: "Syrien", official: "Arabische Republik Syrien", capital: "Damaskus", pop: 24700000, area: 185180, density: 133.0, iso3: "SYR", iso2: "SY", tld: ".sy", en: "Syria", local: "سوريا Sūriyā", disputed: false },
+            { name: "Tadschikistan", official: "Republik Tadschikistan", capital: "Duschanbe", pop: 10300000, area: 143100, density: 72.0, iso3: "TJK", iso2: "TJ", tld: ".tj", en: "Tajikistan", local: "Тоҷикистон Todschikiston", disputed: false },
+            { name: "Tansania", official: "Vereinigte Republik Tansania", capital: "Dodoma (de jure) / Daressalam", pop: 68600000, area: 947300, density: 72.4, iso3: "TZA", iso2: "TZ", tld: ".tz", en: "Tanzania", local: "Tanzania", disputed: false },
+            { name: "Thailand", official: "Königreich Thailand", capital: "Bangkok", pop: 71700000, area: 513120, density: 140.0, iso3: "THA", iso2: "TH", tld: ".th", en: "Thailand", local: "ประเทศไทย Prathet Thai", disputed: false },
+            { name: "Togo", official: "Republik Togo", capital: "Lomé", pop: 8500000, area: 56785, density: 150.0, iso3: "TGO", iso2: "TG", tld: ".tg", en: "Togo", local: "Togo", disputed: false },
+            { name: "Tonga", official: "Königreich Tonga", capital: "Nukuʻalofa", pop: 100000, area: 747, density: 134.0, iso3: "TON", iso2: "TO", tld: ".to", en: "Tonga", local: "Tonga", disputed: false },
+            { name: "Transnistrien", official: "Pridnestrowische Moldauische Republik", capital: "Tiraspol", pop: 555000, area: 3567, density: 156.0, iso3: "—", iso2: "—", tld: "—", en: "Transnistria", local: "Приднестровье", disputed: true },
+            { name: "Trinidad und Tobago", official: "Republik Trinidad und Tobago", capital: "Port of Spain", pop: 1400000, area: 5128, density: 273.0, iso3: "TTO", iso2: "TT", tld: ".tt", en: "Trinidad and Tobago", local: "Trinidad and Tobago", disputed: false },
+            { name: "Tschad", official: "Republik Tschad", capital: "N’Djamena", pop: 18700000, area: 1284000, density: 14.6, iso3: "TCD", iso2: "TD", tld: ".td", en: "Chad", local: "Tchad", disputed: false },
+            { name: "Tschechien", official: "Tschechische Republik", capital: "Prag", pop: 11000000, area: 78867, density: 139.0, iso3: "CZE", iso2: "CZ", tld: ".cz", en: "Czechia", local: "Česko", disputed: false },
+            { name: "Tunesien", official: "Tunesische Republik", capital: "Tunis", pop: 11900000, area: 163610, density: 72.7, iso3: "TUN", iso2: "TN", tld: ".tn", en: "Tunisia", local: "تونس Tūnis", disputed: false },
+            { name: "Türkei", official: "Republik Türkei", capital: "Ankara", pop: 85400000, area: 783562, density: 109.0, iso3: "TUR", iso2: "TR", tld: ".tr", en: "Türkiye", local: "Türkiye", disputed: false },
+            { name: "Turkmenistan", official: "Turkmenistan", capital: "Aşgabat", pop: 7500000, area: 488100, density: 15.4, iso3: "TKM", iso2: "TM", tld: ".tm", en: "Turkmenistan", local: "Türkmenistan", disputed: false },
+            { name: "Tuvalu", official: "Tuvalu", capital: "Funafuti", pop: 10000, area: 26, density: 385.0, iso3: "TUV", iso2: "TV", tld: ".tv", en: "Tuvalu", local: "Tuvalu", disputed: false },
+            { name: "Uganda", official: "Republik Uganda", capital: "Kampala", pop: 50000000, area: 241038, density: 207.0, iso3: "UGA", iso2: "UG", tld: ".ug", en: "Uganda", local: "Uganda", disputed: false },
+            { name: "Ukraine", official: "Ukraine", capital: "Kiew", pop: 37900000, area: 603550, density: 62.8, iso3: "UKR", iso2: "UA", tld: ".ua", en: "Ukraine", local: "Україна Ukrajina", disputed: false },
+            { name: "Ungarn", official: "Ungarn", capital: "Budapest", pop: 9600000, area: 93028, density: 103.0, iso3: "HUN", iso2: "HU", tld: ".hu", en: "Hungary", local: "Magyarország", disputed: false },
+            { name: "Uruguay", official: "Republik Östlich des Uruguay", capital: "Montevideo", pop: 3400000, area: 176215, density: 19.3, iso3: "URY", iso2: "UY", tld: ".uy", en: "Uruguay", local: "Uruguay", disputed: false },
+            { name: "Usbekistan", official: "Republik Usbekistan", capital: "Taschkent", pop: 37200000, area: 447400, density: 83.1, iso3: "UZB", iso2: "UZ", tld: ".uz", en: "Uzbekistan", local: "Oʻzbekiston", disputed: false },
+            { name: "Vanuatu", official: "Republik Vanuatu", capital: "Port Vila", pop: 300000, area: 12189, density: 24.6, iso3: "VUT", iso2: "VU", tld: ".vu", en: "Vanuatu", local: "Vanuatu", disputed: false },
+            { name: "Vatikanstadt", official: "Staat Vatikanstadt", capital: "Stadtstaat", pop: 882, area: 0.44, density: 2000.0, iso3: "VAT", iso2: "VA", tld: ".va", en: "Vatican City", local: "Status Civitatis Vaticanæ", disputed: false },
+            { name: "Venezuela", official: "Bolivarische Republik Venezuela", capital: "Caracas", pop: 28400000, area: 912050, density: 31.1, iso3: "VEN", iso2: "VE", tld: ".ve", en: "Venezuela", local: "Venezuela", disputed: false },
+            { name: "Vereinigte Arabische Emirate", official: "Vereinigte Arabische Emirate", capital: "Abu Dhabi", pop: 9700000, area: 83600, density: 116.0, iso3: "ARE", iso2: "AE", tld: ".ae", en: "United Arab Emirates", local: "الإمارات al-Imārāt", disputed: false },
+            { name: "Vereinigte Staaten", official: "Vereinigte Staaten von Amerika", capital: "Washington, D.C.", pop: 336600000, area: 9826675, density: 34.3, iso3: "USA", iso2: "US", tld: ".us", en: "United States", local: "United States", disputed: false },
+            { name: "Vereinigtes Königreich", official: "Vereinigtes Königreich Großbritannien und Nordirland", capital: "London", pop: 69200000, area: 243610, density: 284.0, iso3: "GBR", iso2: "GB", tld: ".uk", en: "United Kingdom", local: "United Kingdom", disputed: false },
+            { name: "Vietnam", official: "Sozialistische Republik Vietnam", capital: "Hanoi", pop: 101100000, area: 331210, density: 305.0, iso3: "VNM", iso2: "VN", tld: ".vn", en: "Vietnam", local: "Việt Nam", disputed: false },
+            { name: "Westsahara", official: "Demokratische Arabische Republik Sahara", capital: "El Aaiún (de jure) / Tifariti", pop: 600000, area: 266000, density: 2.26, iso3: "ESH", iso2: "EH", tld: ".eh", en: "Western Sahara", local: "Sahara Occidental", disputed: true },
+            { name: "Zentralafrikanische Republik", official: "Zentralafrikanische Republik", capital: "Bangui", pop: 6400000, area: 622984, density: 10.3, iso3: "CAF", iso2: "CF", tld: ".cf", en: "Central African Republic", local: "République centrafricaine", disputed: false },
+            { name: "Zypern", official: "Republik Zypern", capital: "Nikosia", pop: 1400000, area: 9251, density: 151.0, iso3: "CYP", iso2: "CY", tld: ".cy", en: "Cyprus", local: "Κύπρος Kýpros / Kıbrıs", disputed: false }
+        ];
+
+        // Formatierungshelfer
+        const nf = new Intl.NumberFormat('de-DE');
+        const nfDec = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const nfPrec = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+        // Globale Aggregationen (vollständig dynamisch abgeleitet)
+        let TOTAL_POP = 0;
+        let TOTAL_AREA = 0;
+        let DATA = [];
+
+        function initDataStructures() {
+            TOTAL_POP = RAW_DATA.reduce((s, c) => s + c.pop, 0);
+            TOTAL_AREA = RAW_DATA.reduce((s, c) => s + c.area, 0);
+
+            DATA = RAW_DATA.map((c, index) => {
+                const popPer1B = (c.pop / TOTAL_POP) * 1000000000;
+                const areaPer100M = (c.area / TOTAL_AREA) * 100000000;
+                return {
+                    ...c,
+                    origIndex: index + 1,
+                    popPer1B: popPer1B,
+                    areaPer100M: areaPer100M,
+                    probPop: c.pop / TOTAL_POP,
+                    probArea: c.area / TOTAL_AREA,
+                    // Simulationsstatus
+                    genCount: 0,
+                    scaled1B: 0,
+                    delta: 0,
+                    deltaPct: 0,
+                    zScore: 0
+                };
+            });
+        }
+
+        // Navigation
+        function navTab(tabId) {
+            document.querySelectorAll('#mainNav .nav-btn').forEach(btn => btn.classList.remove('nav-active'));
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+
+            event.target.classList.add('nav-active');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            if (tabId === 'dashboard') drawLorenzCurve();
+        }
+
+        /* =========================================================================
+           1. STATISTISCHE ENGINE & DESKRIPTIVES DASHBOARD
+           ========================================================================= */
+        function initDashboard() {
+            document.getElementById('headerCount').innerText = `${DATA.length} Entitäten`;
+            document.getElementById('headerPop').innerText = `${nf.format(TOTAL_POP)} Einw.`;
+            document.getElementById('headerArea').innerText = `${nf.format(Math.round(TOTAL_AREA))} km²`;
+
+            document.getElementById('kpiTotalPop').innerText = nf.format(TOTAL_POP);
+            document.getElementById('kpiTotalArea').innerText = `${nf.format(Math.round(TOTAL_AREA))} km²`;
+            document.getElementById('kpiAreaSqKm').innerText = `${(TOTAL_AREA / 1000000).toFixed(2)} Mio. km²`;
+            document.getElementById('kpiGlobalDensity').innerText = `${(TOTAL_POP / TOTAL_AREA).toFixed(2)} E/km²`;
+
+            const pops = DATA.map(d => d.pop).sort((a,b) => a - b);
+            const areas = DATA.map(d => d.area).sort((a,b) => a - b);
+            const densities = DATA.map(d => d.density).sort((a,b) => a - b);
+
+            const giniPop = calcGini(pops);
+            const giniArea = calcGini(areas);
+            document.getElementById('kpiGiniPop').innerText = giniPop.toFixed(4);
+            document.getElementById('kpiGiniArea').innerText = giniArea.toFixed(4);
+            document.getElementById('lorenzGiniPopVal').innerText = giniPop.toFixed(4);
+            document.getElementById('lorenzGiniAreaVal').innerText = giniArea.toFixed(4);
+
+            // Pop Parameter
+            const pMeanVal = TOTAL_POP / DATA.length;
+            const pStdVal = calcStdDev(pops, pMeanVal);
+            document.getElementById('pMean').innerText = nf.format(Math.round(pMeanVal));
+            document.getElementById('pMedian').innerText = nf.format(calcMedian(pops));
+            document.getElementById('pStd').innerText = nf.format(Math.round(pStdVal));
+            document.getElementById('pCv').innerText = (pStdVal / pMeanVal).toFixed(2);
+            const pQ1 = calcPercentileVal(pops, 0.25);
+            const pQ3 = calcPercentileVal(pops, 0.75);
+            document.getElementById('pQ1').innerText = nf.format(pQ1);
+            document.getElementById('pQ3').innerText = nf.format(pQ3);
+            document.getElementById('pIqr').innerText = nf.format(pQ3 - pQ1);
+            document.getElementById('pRange').innerText = `${nf.format(pops[0])} – ${nf.format(pops[pops.length - 1])}`;
+
+            // Area Parameter
+            const aMeanVal = TOTAL_AREA / DATA.length;
+            const aStdVal = calcStdDev(areas, aMeanVal);
+            document.getElementById('aMean').innerText = `${nf.format(Math.round(aMeanVal))} km²`;
+            document.getElementById('aMedian').innerText = `${nf.format(Math.round(calcMedian(areas)))} km²`;
+            document.getElementById('aStd').innerText = `${nf.format(Math.round(aStdVal))} km²`;
+            document.getElementById('aCv').innerText = (aStdVal / aMeanVal).toFixed(2);
+            const aQ1 = calcPercentileVal(areas, 0.25);
+            const aQ3 = calcPercentileVal(areas, 0.75);
+            document.getElementById('aQ1').innerText = `${nf.format(Math.round(aQ1))} km²`;
+            document.getElementById('aQ3').innerText = `${nf.format(Math.round(aQ3))} km²`;
+            document.getElementById('aIqr').innerText = `${nf.format(Math.round(aQ3 - aQ1))} km²`;
+            document.getElementById('aRange').innerText = `${areas[0]} – ${nf.format(areas[areas.length - 1])} km²`;
+
+            // Density Parameter
+            const dMeanVal = densities.reduce((a, b) => a + b, 0) / DATA.length;
+            document.getElementById('dMean').innerText = `${dMeanVal.toFixed(2)} E/km²`;
+            document.getElementById('dMedian').innerText = `${calcMedian(densities).toFixed(2)} E/km²`;
+            document.getElementById('dQ1').innerText = `${calcPercentileVal(densities, 0.25).toFixed(1)} E/km²`;
+            document.getElementById('dQ3').innerText = `${calcPercentileVal(densities, 0.75).toFixed(1)} E/km²`;
+            document.getElementById('dMin').innerText = `${densities[0]} E/km²`;
+            document.getElementById('dMax').innerText = `${nf.format(densities[densities.length - 1])} E/km²`;
+            document.getElementById('dAbove1000').innerText = `${densities.filter(d => d >= 1000).length} Staaten`;
+            document.getElementById('dBelow25').innerText = `${densities.filter(d => d < 25).length} Staaten`;
+
+            drawLorenzCurve();
+        }
+
+        function calcMedian(arr) {
+            const m = Math.floor(arr.length / 2);
+            return arr.length % 2 !== 0 ? arr[m] : (arr[m - 1] + arr[m]) / 2;
+        }
+
+        function calcPercentileVal(arr, p) {
+            const idx = (arr.length - 1) * p;
+            const low = Math.floor(idx);
+            const up = Math.ceil(idx);
+            return arr[low] + (idx - low) * (arr[up] - arr[low]);
+        }
+
+        function calcStdDev(arr, mean) {
+            return Math.sqrt(arr.reduce((s, x) => s + Math.pow(x - mean, 2), 0) / arr.length);
+        }
+
+        function calcGini(sortedArr) {
+            const n = sortedArr.length;
+            let sumNumerator = 0;
+            for (let i = 0; i < n; i++) {
+                sumNumerator += (2 * (i + 1) - n - 1) * sortedArr[i];
+            }
+            return sumNumerator / (n * sortedArr.reduce((a, b) => a + b, 0));
+        }
+
+        // SVG Lorenz-Kurve
+        function drawLorenzCurve() {
+            const svg = document.getElementById('lorenzSvg');
+            const w = 700, h = 450;
+            const padL = 70, padR = 40, padT = 30, padB = 60;
+            const plotW = w - padL - padR;
+            const plotH = h - padT - padB;
+
+            // Sortieren für Lorenz
+            const popSorted = [...DATA].sort((a,b) => a.pop - b.pop);
+            const areaSorted = [...DATA].sort((a,b) => a.area - b.area);
+
+            let popPath = `M ${padL} ${padT + plotH}`;
+            let areaPath = `M ${padL} ${padT + plotH}`;
+
+            let cumP = 0, cumA = 0;
+            const N = DATA.length;
+
+            for (let i = 0; i < N; i++) {
+                cumP += popSorted[i].pop;
+                cumA += areaSorted[i].area;
+
+                const x = padL + ((i + 1) / N) * plotW;
+                const yP = padT + plotH - (cumP / TOTAL_POP) * plotH;
+                const yA = padT + plotH - (cumA / TOTAL_AREA) * plotH;
+
+                popPath += ` L ${x.toFixed(1)} ${yP.toFixed(1)}`;
+                areaPath += ` L ${x.toFixed(1)} ${yA.toFixed(1)}`;
+            }
+
+            svg.innerHTML = `
+                <!-- Raster -->
+                ${[0, 20, 40, 60, 80, 100].map(pct => {
+                    const y = padT + plotH - (pct / 100) * plotH;
+                    const x = padL + (pct / 100) * plotW;
+                    return `
+                        <line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                        <line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + plotH}" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                        <text x="${padL - 12}" y="${y + 4}" font-size="10" text-anchor="end" fill="#64748b" font-family="monospace">${pct}%</text>
+                        <text x="${x}" y="${padT + plotH + 20}" font-size="10" text-anchor="middle" fill="#64748b" font-family="monospace">${pct}%</text>
+                    `;
+                }).join('')}
+
+                <!-- Diagonale Gleichverteilung -->
+                <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4" />
+
+                <!-- Flächen-Kurve -->
+                <path d="${areaPath}" fill="none" stroke="#10b981" stroke-width="2.5" />
+
+                <!-- Bevölkerungs-Kurve -->
+                <path d="${popPath}" fill="none" stroke="#2563eb" stroke-width="2.5" />
+
+                <!-- Achsenbeschriftung -->
+                <text x="${padL + plotW / 2}" y="${h - 15}" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">Kumulierter Anteil aller Staaten (0 bis 100 %)</text>
+                <text transform="rotate(-90)" x="${-(padT + plotH / 2)}" y="25" font-size="11" font-weight="bold" text-anchor="middle" fill="#1e293b">Kumulierter globaler Anteil (0 bis 100 %)</text>
+            `;
+        }
+
+        /* =========================================================================
+           2. STOCHASTISCHER GENERATOR & GROSSSIMULATION (BILLIARDENFÄHIG)
+           ========================================================================= */
+        let simMode = 'pop'; // 'pop' oder 'area'
+        let simSortCol = 'origIndex';
+        let simSortAsc = true;
+
+        function setSimMode(mode) {
+            simMode = mode;
+            const isPop = mode === 'pop';
+            document.getElementById('lblModePop').className = isPop ? "cursor-pointer border-2 border-blue-600 bg-white p-3.5 rounded-xl flex flex-col justify-between" : "cursor-pointer border-2 border-slate-200 bg-white p-3.5 rounded-xl flex flex-col justify-between";
+            document.getElementById('lblModeArea').className = !isPop ? "cursor-pointer border-2 border-emerald-600 bg-white p-3.5 rounded-xl flex flex-col justify-between" : "cursor-pointer border-2 border-slate-200 bg-white p-3.5 rounded-xl flex flex-col justify-between";
+        }
+
+        function drawSingle() {
+            const weights = simMode === 'pop' ? DATA.map(d => d.pop) : DATA.map(d => d.area);
+            const totalW = simMode === 'pop' ? TOTAL_POP : TOTAL_AREA;
+            const r = Math.random() * totalW;
+
+            let cum = 0, selected = DATA[0];
+            for (let i = 0; i < DATA.length; i++) {
+                cum += weights[i];
+                if (r <= cum) {
+                    selected = DATA[i];
+                    break;
+                }
+            }
+
+            const p = simMode === 'pop' ? selected.probPop : selected.probArea;
+            document.getElementById('singleDrawBox').classList.remove('hidden');
+            document.getElementById('singleDrawModeTag').innerText = simMode === 'pop' ? "Zufallsauswahl gewichtet nach Bevölkerung (Einwohner)" : "Zufallsauswahl gewichtet nach Staatsfläche (km²)";
+            document.getElementById('sCountryName').innerText = selected.name;
+            document.getElementById('sOfficialName').innerText = selected.official;
+            document.getElementById('sCapital').innerText = selected.capital;
+            document.getElementById('sPop').innerText = nf.format(selected.pop);
+            document.getElementById('sArea').innerText = `${nf.format(selected.area)} km²`;
+            document.getElementById('sDensity').innerText = `${selected.density} E/km²`;
+            document.getElementById('sIso').innerText = `${selected.iso3} / ${selected.tld}`;
+            document.getElementById('sProbVal').innerText = `${(p * 100).toFixed(6)} %`;
+            document.getElementById('sProbRatio').innerText = `1 zu ${nf.format(Math.round(1 / p))}`;
+        }
+
+        // Hochleistungs-Generator für Simulationen bis zu 100 Milliarden
+        function runSimulation() {
+            const N = parseFloat(document.getElementById('simCountInput').value);
+            if (isNaN(N) || N <= 0) return;
+
+            const isPop = simMode === 'pop';
+            const totalWeight = isPop ? TOTAL_POP : TOTAL_AREA;
+            const probs = DATA.map(d => isPop ? d.probPop : d.probArea);
+
+            let counts = new Array(DATA.length).fill(0);
+
+            if (N <= 200000) {
+                // Exakte Schleife bei kleineren Anzahlen
+                for (let step = 0; step < N; step++) {
+                    const r = Math.random();
+                    let cum = 0;
+                    for (let i = 0; i < probs.length; i++) {
+                        cum += probs[i];
+                        if (r <= cum || i === probs.length - 1) {
+                            counts[i]++;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // Hocheffiziente Multinomiale Gauß-Approximation (Box-Muller-Transformation)
+                let assignedSum = 0;
+                for (let i = 0; i < DATA.length; i++) {
+                    const p = probs[i];
+                    const mean = N * p;
+                    const sd = Math.sqrt(N * p * (1 - p));
+
+                    // Normal-verteilter Zufallswert
+                    const u1 = Math.max(1e-12, Math.random());
+                    const u2 = Math.random();
+                    const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+
+                    let c = Math.round(mean + z * sd);
+                    if (c < 0) c = 0;
+                    counts[i] = c;
+                    assignedSum += c;
+                }
+
+                // Reskalierung auf exakt N
+                let diff = N - assignedSum;
+                if (diff !== 0) {
+                    const largestIdx = probs.indexOf(Math.max(...probs));
+                    counts[largestIdx] += diff;
+                }
+            }
+
+            // Metriken berechnen
+            DATA.forEach((d, i) => {
+                const k = counts[i];
+                const p = probs[i];
+                const expected = N * p;
+                const sd = Math.sqrt(N * p * (1 - p));
+
+                d.genCount = k;
+                // Hochrechnung: Entweder 1 Mrd. Einwohner oder 100 Mio. km²
+                d.scaled1B = isPop ? (k / N) * 1000000000 : (k / N) * 100000000;
+                d.delta = k - expected;
+                d.deltaPct = expected > 0 ? ((k - expected) / expected) * 100 : 0;
+                d.zScore = sd > 0 ? (k - expected) / sd : 0;
+            });
+
+            document.getElementById('simStatusBadge').innerText = `Basis: ${nf.format(N)} Ziehungen (${isPop ? 'Bevölkerung' : 'Fläche'})`;
+            renderSimTable();
+        }
+
+        function sortSimTable(col) {
+            if (simSortCol === col) simSortAsc = !simSortAsc;
+            else { simSortCol = col; simSortAsc = true; }
+            renderSimTable();
+        }
+
+        function resetSimSortToOriginal() {
+            simSortCol = 'origIndex';
+            simSortAsc = true;
+            renderSimTable();
+        }
+
+        function renderSimTable() {
+            const list = [...DATA];
+            list.sort((a, b) => {
+                let vA = a[simSortCol];
+                let vB = b[simSortCol];
+                if (typeof vA === 'string') return simSortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                return simSortAsc ? vA - vB : vB - vA;
+            });
+
+            const isPop = simMode === 'pop';
+            const tbody = document.getElementById('simTableBody');
+            tbody.innerHTML = list.map(d => {
+                const zCol = Math.abs(d.zScore) > 2.5 ? 'text-amber-600 font-bold' : 'text-slate-600';
+                const deltaCol = d.delta >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                return `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="p-3 text-slate-400 font-bold">${d.origIndex}</td>
+                        <td class="p-3 font-bold text-slate-900">${d.name}</td>
+                        <td class="p-3 text-slate-600 font-sans">${d.capital}</td>
+                        <td class="p-3 text-right text-slate-800">${nf.format(d.pop)}</td>
+                        <td class="p-3 text-right font-bold text-blue-700">${nfDec.format(d.popPer1B)}</td>
+                        <td class="p-3 text-right text-slate-800">${nf.format(d.area)}</td>
+                        <td class="p-3 text-right font-bold text-emerald-700">${nfDec.format(d.areaPer100M)}</td>
+                        <td class="p-3 text-right text-slate-700">${d.density}</td>
+                        <td class="p-3 text-right font-bold bg-blue-50/40 text-blue-900">${nf.format(d.genCount)}</td>
+                        <td class="p-3 text-right font-bold bg-purple-50/40 text-purple-900">${nfDec.format(d.scaled1B)}</td>
+                        <td class="p-3 text-right ${deltaCol}">${d.delta > 0 ? '+' : ''}${nf.format(Math.round(d.delta))} (${d.deltaPct > 0 ? '+' : ''}${d.deltaPct.toFixed(2)}%)</td>
+                        <td class="p-3 text-right ${zCol}">${d.zScore.toFixed(2)} σ</td>
+                        <td class="p-3 font-mono text-slate-400">${d.iso3}</td>
+                        <td class="p-3 font-mono text-slate-400">${d.iso2}</td>
+                        <td class="p-3 font-mono text-slate-400">${d.tld}</td>
+                        <td class="p-3 font-sans text-slate-600">${d.en}</td>
+                        <td class="p-3 font-sans text-slate-500">${d.local}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /* =========================================================================
+           3. VOLLSTÄNDIGE PERZENTIL-ANALYSE
+           ========================================================================= */
+        let percMetric = 'pop';
+        let percSortCol = 'rank';
+        let percSortAsc = true;
+
+        function setPercentileMetric(m) {
+            percMetric = m;
+            document.getElementById('btnPercPop').className = m === 'pop' ? "flex-1 py-2 rounded-lg bg-white text-blue-900 shadow-xs transition" : "flex-1 py-2 rounded-lg text-slate-600 transition";
+            document.getElementById('btnPercArea').className = m === 'area' ? "flex-1 py-2 rounded-lg bg-white text-emerald-900 shadow-xs transition" : "flex-1 py-2 rounded-lg text-slate-600 transition";
+            renderPercTable();
+        }
+
+        function sortPercTable(col) {
+            if (percSortCol === col) percSortAsc = !percSortAsc;
+            else { percSortCol = col; percSortAsc = true; }
+            renderPercTable();
+        }
+
+        function resetPercSortToOriginal() {
+            percSortCol = 'origIndex';
+            percSortAsc = true;
+            renderPercTable();
+        }
+
+        function renderPercTable() {
+            const isPop = percMetric === 'pop';
+            const total = isPop ? TOTAL_POP : TOTAL_AREA;
+
+            // Aufsteigend sortieren für mathematische Rang- & Perzentilberechnung
+            const sortedByVal = [...DATA].sort((a, b) => isPop ? (a.pop - b.pop) : (a.area - b.area));
+
+            let cumSum = 0;
+            const enriched = sortedByVal.map((d, index) => {
+                const val = isPop ? d.pop : d.area;
+                cumSum += val;
+                const percentile = (index / (DATA.length - 1)) * 100;
+                const cumPct = (cumSum / total) * 100;
+                const pct = (val / total) * 100;
+                return {
+                    ...d,
+                    rank: index + 1,
+                    val: val,
+                    pct: pct,
+                    percentile: percentile,
+                    cumPct: cumPct
+                };
+            });
+
+            // Tabellensortierung
+            enriched.sort((a, b) => {
+                let vA = a[percSortCol];
+                let vB = b[percSortCol];
+                if (typeof vA === 'string') return percSortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                return percSortAsc ? vA - vB : vB - vA;
+            });
+
+            const tbody = document.getElementById('percTableBody');
+            tbody.innerHTML = enriched.map(d => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
+                    <td class="p-3 text-slate-400 font-bold">${d.origIndex}</td>
+                    <td class="p-3 text-center font-bold text-slate-800">${d.rank}</td>
+                    <td class="p-3 font-bold text-slate-900">${d.name}</td>
+                    <td class="p-3 text-right text-slate-900 font-bold">${nf.format(d.val)} ${isPop ? '' : 'km²'}</td>
+                    <td class="p-3 text-right text-slate-700">${nfPrec.format(d.pct)} %</td>
+                    <td class="p-3 text-right font-bold text-blue-700">${d.percentile.toFixed(2)} %</td>
+                    <td class="p-3 text-right font-bold text-emerald-700">${d.cumPct.toFixed(3)} %</td>
+                    <td class="p-3 text-right text-slate-600">${nfDec.format(d.popPer1B)}</td>
+                    <td class="p-3 text-right text-slate-600">${nfDec.format(d.areaPer100M)}</td>
+                    <td class="p-3 font-sans text-slate-600">${d.capital}</td>
+                    <td class="p-3 font-mono text-slate-400">${d.iso3}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('percTableCountDisplay').innerText = `Alle ${DATA.length} Entitäten bewertet nach ${isPop ? 'Einwohnerzahl' : 'Fläche'}`;
+        }
+
+        function calcCustomPercentile() {
+            const inputVal = parseFloat(document.getElementById('percQueryInput').value);
+            if (isNaN(inputVal) || inputVal < 0) return;
+
+            const isPop = percMetric === 'pop';
+            const sorted = [...DATA].map(d => isPop ? d.pop : d.area).sort((a,b) => a - b);
+            const smallerCount = sorted.filter(v => v < inputVal).length;
+            const pct = (smallerCount / sorted.length) * 100;
+
+            document.getElementById('percQueryResult').innerText = 
+                `Ergebnis: Ein Wert von ${nf.format(inputVal)} ${isPop ? 'Einwohnern' : 'km²'} liegt bei Perzentil ${pct.toFixed(2)}% (größer als ${smallerCount} von ${DATA.length} Staaten).`;
+        }
+
+        /* =========================================================================
+           4. 3D-HYPOTHESENRECHNER (WAS WÄRE WENN)
+           ========================================================================= */
+        function initWhatIf() {
+            const selA = document.getElementById('whatifSelectA');
+            const selB = document.getElementById('whatifSelectB');
+
+            DATA.forEach((d, i) => {
+                selA.add(new Option(d.name, i));
+                selB.add(new Option(d.name, i));
+            });
+
+            // Standard: Deutschland (A) und Japan (B)
+            selA.selectedIndex = DATA.findIndex(d => d.name === "Deutschland");
+            selB.selectedIndex = DATA.findIndex(d => d.name === "Japan");
+            calcWhatIf();
+        }
+
+        function calcWhatIf() {
+            const a = DATA[document.getElementById('whatifSelectA').value];
+            const b = DATA[document.getElementById('whatifSelectB').value];
+
+            // Realdaten A
+            document.getElementById('wiNameA').innerText = a.name;
+            document.getElementById('wiOfficialA').innerText = a.official;
+            document.getElementById('wiPopA').innerText = nf.format(a.pop);
+            document.getElementById('wiAreaA').innerText = `${nf.format(a.area)} km²`;
+            document.getElementById('wiDensityA').innerText = `${a.density} E/km²`;
+            document.getElementById('wiPopPctA').innerText = `${(a.probPop * 100).toFixed(4)} %`;
+
+            // Realdaten B
+            document.getElementById('wiNameB').innerText = b.name;
+            document.getElementById('wiOfficialB').innerText = b.official;
+            document.getElementById('wiPopB').innerText = nf.format(b.pop);
+            document.getElementById('wiAreaB').innerText = `${nf.format(b.area)} km²`;
+            document.getElementById('wiDensityB').innerText = `${b.density} E/km²`;
+            document.getElementById('wiPopPctB').innerText = `${(b.probPop * 100).toFixed(4)} %`;
+
+            // 1. Dichte-Hypothese: Pop_hypo = Area(A) * Density(B)
+            const hypoPopFromDensity = Math.round(a.area * b.density);
+            const densityFactor = hypoPopFromDensity / a.pop;
+            document.getElementById('resHypoDensity').innerText = `${nf.format(hypoPopFromDensity)} Einw.`;
+            document.getElementById('resHypoDensityFactor').innerText = `Entspricht dem ${densityFactor.toFixed(2)}-fachen der aktuellen Bevölkerung von ${a.name}.`;
+
+            // 2. Flächen-Hypothese: Pop_hypo = Area(B) * Density(A)
+            const hypoPopFromArea = Math.round(b.area * a.density);
+            const areaFactor = hypoPopFromArea / a.pop;
+            document.getElementById('resHypoArea').innerText = `${nf.format(hypoPopFromArea)} Einw.`;
+            document.getElementById('resHypoAreaFactor').innerText = `Entspricht dem ${areaFactor.toFixed(2)}-fachen der aktuellen Bevölkerung von ${a.name}.`;
+
+            // 3. Einwohner-Hypothese: Density_hypo = Pop(B) / Area(A)
+            const hypoDensityFromPop = (b.pop / a.area).toFixed(2);
+            const popDensityFactor = hypoDensityFromPop / a.density;
+            document.getElementById('resHypoPopDensity').innerText = `${hypoDensityFromPop} E/km²`;
+            document.getElementById('resHypoPopDensityFactor').innerText = `Faktor ${popDensityFactor.toFixed(2)}x gegenüber der heutigen Dichte (${a.density} E/km²).`;
+
+            // Globale Planetenrechnung
+            const globalPopHypo = Math.round(TOTAL_AREA * a.density);
+            document.getElementById('globalPlanetText').innerText = 
+                `Wenn die gesamte globale Landfläche (${nf.format(Math.round(TOTAL_AREA))} km²) dieselbe Bevölkerungsdichte wie ${a.name} (${a.density} Einw./km²) aufweisen würde:`;
+            document.getElementById('globalPlanetPop').innerText = `${nf.format(globalPopHypo)} Menschen (${(globalPopHypo / TOTAL_POP).toFixed(2)}x der aktuellen Weltbevölkerung)`;
+        }
+
+        /* =========================================================================
+           5. GESAMTE TABELLE & FILTER
+           ========================================================================= */
+        let fullSortCol = 'origIndex';
+        let fullSortAsc = true;
+        let fullFilter = 'all';
+
+        function setFullFilter(f) {
+            fullFilter = f;
+            document.querySelectorAll('.full-f-btn').forEach(btn => {
+                if (btn.dataset.f === f) {
+                    btn.className = "full-f-btn bg-slate-800 text-white px-3 py-2 rounded-lg font-bold";
+                } else {
+                    btn.className = "full-f-btn bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg font-medium";
+                }
+            });
+            renderFullTable();
+        }
+
+        function sortFullTable(col) {
+            if (fullSortCol === col) fullSortAsc = !fullSortAsc;
+            else { fullSortCol = col; fullSortAsc = true; }
+            renderFullTable();
+        }
+
+        function resetFullTableToOriginal() {
+            fullSortCol = 'origIndex';
+            fullSortAsc = true;
+            document.getElementById('fullSearchInput').value = '';
+            setFullFilter('all');
+        }
+
+        function renderFullTable() {
+            const query = document.getElementById('fullSearchInput').value.toLowerCase().trim();
+
+            let list = DATA.filter(d => {
+                const matchQuery = d.name.toLowerCase().includes(query) ||
+                                   d.official.toLowerCase().includes(query) ||
+                                   d.capital.toLowerCase().includes(query) ||
+                                   d.iso3.toLowerCase().includes(query) ||
+                                   d.en.toLowerCase().includes(query) ||
+                                   d.local.toLowerCase().includes(query);
+                if (!matchQuery) return false;
+
+                if (fullFilter === 'un') return !d.disputed;
+                if (fullFilter === 'disputed') return d.disputed;
+                if (fullFilter === 'p10m') return d.pop >= 10000000;
+                if (fullFilter === 'p1m') return d.pop < 1000000;
+                return true;
+            });
+
+            list.sort((a, b) => {
+                let vA = a[fullSortCol];
+                let vB = b[fullSortCol];
+                if (typeof vA === 'string') return fullSortAsc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+                return fullSortAsc ? vA - vB : vB - vA;
+            });
+
+            const tbody = document.getElementById('fullTableBody');
+            tbody.innerHTML = list.map(d => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
+                    <td class="p-3 text-slate-400 font-bold">${d.origIndex}</td>
+                    <td class="p-3 font-bold text-slate-900">
+                        ${d.name}
+                        ${d.disputed ? '<span class="ml-1 text-[9px] bg-amber-100 text-amber-800 px-1 py-0.2 rounded font-semibold">umstritten</span>' : ''}
+                    </td>
+                    <td class="p-3 font-sans text-slate-600 truncate max-w-xs" title="${d.official}">${d.official}</td>
+                    <td class="p-3 font-sans text-slate-700">${d.capital}</td>
+                    <td class="p-3 text-right font-bold text-slate-900">${nf.format(d.pop)}</td>
+                    <td class="p-3 text-right font-bold text-blue-700">${nfDec.format(d.popPer1B)}</td>
+                    <td class="p-3 text-right text-slate-800">${nf.format(d.area)}</td>
+                    <td class="p-3 text-right font-bold text-emerald-700">${nfDec.format(d.areaPer100M)}</td>
+                    <td class="p-3 text-right text-slate-700">${d.density}</td>
+                    <td class="p-3 text-center font-mono text-slate-400">${d.iso3}</td>
+                    <td class="p-3 text-center font-mono text-slate-400">${d.iso2}</td>
+                    <td class="p-3 text-center font-mono text-slate-400">${d.tld}</td>
+                    <td class="p-3 font-sans text-slate-600">${d.en}</td>
+                    <td class="p-3 font-sans text-slate-500">${d.local}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('fullTableCountDisplay').innerText = 
+                `${list.length} von ${DATA.length} Staaten angezeigt (Sortierung nach: ${fullSortCol}, ${fullSortAsc ? 'aufsteigend' : 'absteigend'})`;
+        }
+
+        // Initialisierung beim Laden
+        window.addEventListener('DOMContentLoaded', () => {
+            initDataStructures();
+            initDashboard();
+            renderSimTable();
+            renderPercTable();
+            initWhatIf();
+            renderFullTable();
+        });
+    </script>
+</body>
+</html>
