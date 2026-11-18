@@ -41,15 +41,25 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     font-family: var(--font-sans);
     background: var(--bg-page);
     color: var(--text-main);
     line-height: 1.6;
     font-size: 14px;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
   }
+  body.mode-desktop { min-width: 0; width: 1240px; }
+  body.mode-mobile .container { max-width: 640px; }
 
   .num {
     font-family: var(--font-mono);
@@ -552,7 +562,18 @@
           und des CIA World Factbook (Januar 2026).
         </p>
       </div>
-      <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <select id="paramViewMode" class="select" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);padding:5px 8px;font-size:12px;">
+          <option value="auto" style="color:#000;">Ansicht: Automatisch</option>
+          <option value="mobile" style="color:#000;">Ansicht: Mobil</option>
+          <option value="desktop" style="color:#000;">Ansicht: Desktop-Site</option>
+        </select>
+        <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:3px 6px;">
+          <button type="button" class="btn btn-sm" id="btnScaleDown" style="padding:2px 6px;">−</button>
+          <input type="number" id="paramScaleInput" inputmode="numeric" min="25" max="150" step="5" value="100" style="width:48px;text-align:center;background:transparent;border:none;color:#fff;font-weight:700;font-size:12px;">
+          <button type="button" class="btn btn-sm" id="btnScaleUp" style="padding:2px 6px;">+</button>
+          <button type="button" class="btn btn-sm" id="btnScaleReset" style="padding:2px 6px;">100%</button>
+        </div>
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);" onclick="window.print()">Dokument drucken / PDF</button>
       </div>
     </div>
@@ -2709,6 +2730,35 @@ document.addEventListener("DOMContentLoaded", () => {
   initWhatIf();
   renderPercTable();
   renderMasterTable();
+
+  let viewMode = "auto";
+  let uiScale = 100;
+  function applyViewSettings() {
+    const isDesktop = viewMode === "desktop";
+    document.body.classList.toggle("mode-desktop", isDesktop);
+    document.body.classList.toggle("mode-mobile", viewMode === "mobile");
+    uiScale = Math.max(25, Math.min(150, Math.round(uiScale || 100)));
+    let scale = uiScale / 100;
+    if (isDesktop && window.innerWidth < 1240) scale = (window.innerWidth / 1240) * (uiScale / 100);
+    document.body.style.transformOrigin = "top left";
+    if (Math.abs(scale - 1) < 0.001) {
+      document.body.style.transform = "";
+      document.body.style.width = isDesktop ? "1240px" : "";
+    } else {
+      document.body.style.transform = `scale(${scale.toFixed(4)})`;
+      document.body.style.width = isDesktop ? "1240px" : `${(100 / scale).toFixed(4)}%`;
+    }
+    document.getElementById("paramViewMode").value = viewMode;
+    document.getElementById("paramScaleInput").value = String(uiScale);
+  }
+  const updateScale = (v) => { const n = parseInt(v, 10); if (!Number.isNaN(n)) { uiScale = n; applyViewSettings(); } };
+  document.getElementById("paramViewMode").addEventListener("change", (e) => { viewMode = e.target.value; applyViewSettings(); });
+  document.getElementById("paramScaleInput").addEventListener("change", (e) => updateScale(e.target.value));
+  document.getElementById("btnScaleDown").addEventListener("click", () => updateScale(uiScale - 5));
+  document.getElementById("btnScaleUp").addEventListener("click", () => updateScale(uiScale + 5));
+  document.getElementById("btnScaleReset").addEventListener("click", () => updateScale(100));
+  window.addEventListener("resize", applyViewSettings);
+  applyViewSettings();
 });
 </script>
 </body>
